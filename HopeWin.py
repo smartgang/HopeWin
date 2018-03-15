@@ -50,9 +50,10 @@ def removeContractSwap(resultlist,contractswaplist):
     results = results.reset_index(drop=True)
     return results
 
-def HopeWin(symbolInfo,setname,K_MIN_SAR,K_MIN_MACD,rawdata_sar,rawdata_macd,macdParaSet,contractswaplist,calcResult=True):
-
+def HopeWin(symbolInfo,setname,K_MIN_SAR,K_MIN_MACD,startdate,enddate,macdParaSet,contractswaplist,calcResult=True):
     print setname
+    rawdata_sar = pd.read_csv('rawdata_sar.csv')
+    rawdata_macd = DC.getBarData(symbolInfo.symbol, K_MIN_MACD, startdate + " 00:00:00", enddate + " 23:59:59")
     MACD_S=macdParaSet['MACD_S']
     MACD_L = macdParaSet['MACD_L']
     MACD_M = macdParaSet['MACD_M']
@@ -199,6 +200,8 @@ def HopeWin(symbolInfo,setname,K_MIN_SAR,K_MIN_MACD,rawdata_sar,rawdata_macd,mac
         print results
     filename = ("%s%d %d %s result.csv" % (symbolInfo.symbol, K_MIN_SAR, K_MIN_MACD,setname))
     result.to_csv(filename)
+    del rawdata_sar
+    del rawdata_macd
     return results
 
 if __name__=='__main__':
@@ -224,7 +227,7 @@ if __name__=='__main__':
     upperpath=DC.getUpperPath(1)
     foldername = ' '.join([exchange_id, sec_id, str(K_MIN_SAR),str(K_MIN_MACD)])
     resultpath=upperpath+"\\Results\\"
-    os.chdir('Results')
+    os.chdir(resultpath)
     try:
         os.mkdir(foldername)
     except:
@@ -255,8 +258,6 @@ if __name__=='__main__':
                               ['Setname', 'MACD_S', 'MACD_L', 'MACD_M', 'opentimes', 'end_cash', 'SR', 'Annual','Sharpe','DrawBack',
                                'max_single_loss_rate'])
     for i in range(0, paranum):
-        rawdata_sar=pd.read_csv('rawdata_sar.csv')
-        rawdata_macd = DC.getBarData(symbol, K_MIN_MACD, startdate + " 00:00:00", enddate + " 23:59:59")
         setname = parasetlist.ix[i, 'Setname']
         macd_s = parasetlist.ix[i, 'MACD_Short']
         macd_l = parasetlist.ix[i, 'MACD_Long']
@@ -266,9 +267,8 @@ if __name__=='__main__':
             'MACD_L': macd_l,
             'MACD_M': macd_m,
         }
-        #HopeWin(symbolInfo, setname, K_MIN_SAR, K_MIN_MACD, rawdata_sar, rawdata_macd, macdParaSet, contractswaplist)
-        l.append(pool.apply_async(HopeWin,
-                                 (symbolInfo,setname,K_MIN_SAR,K_MIN_MACD,rawdata_sar,rawdata_macd,macdParaSet,contractswaplist)))
+        #HopeWin(symbolInfo, setname, K_MIN_SAR, K_MIN_MACD, startdate, enddate, macdParaSet, contractswaplist)
+        l.append(pool.apply_async(HopeWin,(symbolInfo,setname,K_MIN_SAR,K_MIN_MACD,startdate,enddate,macdParaSet,contractswaplist)))
     pool.close()
     pool.join()
 
