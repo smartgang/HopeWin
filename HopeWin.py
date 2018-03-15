@@ -221,7 +221,7 @@ if __name__=='__main__':
     MACD_M = 9
 
     #文件路径
-    upperpath=DC.getCurrentPath()
+    upperpath=DC.getUpperPath(1)
     foldername = ' '.join([exchange_id, sec_id, str(K_MIN_SAR),str(K_MIN_MACD)])
     resultpath=upperpath+"\\Results\\"
     os.chdir('Results')

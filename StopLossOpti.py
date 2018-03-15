@@ -37,7 +37,7 @@ if __name__=='__main__':
     nolossThreshhold = 3 * pricetick
 
     #文件路径
-    upperpath=DC.getCurrentPath()
+    upperpath=DC.getUpperPath(1)
     resultpath=upperpath+"\\Results\\"
     foldername = ' '.join([exchange_id, sec_id, str(K_MIN_SAR)])
     oprresultpath=resultpath+foldername
