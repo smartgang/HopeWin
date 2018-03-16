@@ -1,0 +1,76 @@
+# -*- coding: utf-8 -*-
+import multiTargetForward as mtf
+from datetime import datetime
+import pandas as pd
+import DATA_CONSTANTS as DC
+import os
+import multiprocessing
+
+if __name__=='__main__':
+    # ======================================参数配置===================================================
+    exchange_id = 'DCE'
+    sec_id = 'I'
+    K_MIN_SAR = 900
+    K_MIN_MACD = 3600
+    symbol = '.'.join([exchange_id, sec_id])
+    startdate = '2016-01-01'
+    enddate = '2017-12-31'
+    nextmonth = 'Jan-18'
+    # windowsSet=[1,2,3,4,5,6,9,12,15]
+    windowsSet = range(1, 13)  # 白区窗口值
+
+    newresult = True #！！正常:False，双止损:True
+    resultfilesuffix = 'resultDSL_by_tick.csv'  # 前面不带空格,正常:result.csv,dsl:resultDSL_by_tick.csv,ownl:resultOWNL_by_tick.csv
+    monthlyretrsuffix = 'monthly_retr_new.csv'  # 前面不带下划线,正常:monthly_retr.csv,双止损:monthly_retr_new.csv
+    colslist = mtf.getColumnsName(newresult)
+
+    # ============================================文件路径========================================================
+    upperpath = DC.getUpperPath(uppernume=1)
+    resultpath = upperpath + "\\Results\\"
+    foldername = ' '.join([exchange_id, sec_id, str(K_MIN_SAR),str(K_MIN_MACD)])
+    #rawdatapath = resultpath + foldername + '\\'
+
+    parasetlist = pd.read_csv(resultpath + 'MACDParameterSet1.csv')
+    setlist = pd.Series([str(K_MIN_MACD)+' '] * parasetlist.shape[0])   #因为HP的文件名跟LW不同，多了一个MACD的周期在前面，要处理一下
+    parasetlist['Setname'] = setlist.str.cat(parasetlist['Setname'])
+
+    rawdatapath = resultpath + foldername + '\\DynamicStopLoss-22.0\\' #！！正常:'\\'，双止损：填上'\\+双止损目标文件夹\\'
+    forwordresultpath = rawdatapath + '\\ForwardResults\\'
+    forwardrankpath = rawdatapath + '\\ForwardRank\\'
+
+    monthlist = [datetime.strftime(x, '%b-%y') for x in list(pd.date_range(start=startdate, end=enddate, freq='M'))]
+    monthlist.append(nextmonth)
+    os.chdir(rawdatapath)
+    try:
+        os.mkdir('ForwardResults')
+    except:
+        print 'ForwardResults already exist!'
+    try:
+        os.mkdir('ForwardRank')
+    except:
+        print 'ForwardRank already exist!'
+    try:
+        os.mkdir('ForwardOprAnalyze')
+    except:
+        print 'ForwardOprAnalyze already exist!'
+
+    starttime = datetime.now()
+    print starttime
+    # 多进程优化，启动一个对应CPU核心数量的进程池
+    '''
+    pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
+    l = []
+    for whiteWindows in windowsSet:
+        #l.append(mtf.runPara(whiteWindows, symbol, K_MIN_SAR, parasetlist, monthlist, rawdatapath, forwordresultpath, forwardrankpath, colslist, resultfilesuffix))
+        l.append(pool.apply_async(mtf.runPara, (
+        whiteWindows, symbol, K_MIN_SAR, parasetlist, monthlist, rawdatapath, forwordresultpath, forwardrankpath, colslist,
+        resultfilesuffix)))
+    pool.close()
+    pool.join()
+
+    mtf.calGrayResult(symbol, K_MIN_SAR, windowsSet, forwardrankpath, rawdatapath, monthlyfilesuffix=monthlyretrsuffix)
+    '''
+    mtf.calOprResult(rawdatapath, symbol, K_MIN_SAR, nextmonth, columns=colslist, resultfilesuffix=resultfilesuffix)
+    endtime = datetime.now()
+    print starttime
+    print endtime
