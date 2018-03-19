@@ -65,7 +65,7 @@ def HopeWin(symbolInfo,setname,K_MIN_SAR,K_MIN_MACD,startdate,enddate,macdParaSe
 
     # 将MACD合并到SAR数据
     rawdata_sar.set_index('utc_time', inplace=True)
-    rawdata_macd.set_index('utc_time', inplace=True)
+    rawdata_macd.set_index('utc_endtime', inplace=True) #使用macd的结束时间跟SAR的开始时间对齐，相当于使用上1小时的MACD值
     rawdata_sar['DIF'] = rawdata_macd['DIF']
     rawdata_sar['DEA'] = rawdata_macd['DEA']
     rawdata_sar.fillna(method='ffill', inplace=True)
