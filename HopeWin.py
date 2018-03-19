@@ -31,6 +31,7 @@ import DATA_CONSTANTS as DC
 import numpy as np
 import multiprocessing
 import ResultStatistics as RS
+from prepareMACD import *
 
 def removeContractSwap(resultlist,contractswaplist):
     results=resultlist
@@ -58,6 +59,7 @@ def HopeWin(symbolInfo,setname,K_MIN_SAR,K_MIN_MACD,startdate,enddate,macdParaSe
     MACD_L = macdParaSet['MACD_L']
     MACD_M = macdParaSet['MACD_M']
 
+    '''
     # 计算MACD
     macd = MA.calMACD(rawdata_macd['close'], MACD_S, MACD_L, MACD_M)
     rawdata_macd['DIF'] = macd[0]
@@ -70,8 +72,10 @@ def HopeWin(symbolInfo,setname,K_MIN_SAR,K_MIN_MACD,startdate,enddate,macdParaSe
     rawdata_sar['DEA'] = rawdata_macd['DEA']
     rawdata_sar.fillna(method='ffill', inplace=True)
     rawdata_sar.reset_index(inplace=True)
+    '''
+    rawdata_sar=prepareMACD(rawdata_sar,rawdata_macd,MACD_S,MACD_L,MACD_M)
     # 计算MACD的金叉和死叉
-    rawdata_sar['MACD_True'], rawdata_sar['MACD_Cross'] = MA.dfCross(rawdata_sar, 'DIF', 'DEA')
+    rawdata_sar['MACD_True'], rawdata_sar['MACD_Cross'] = MA.dfCross(rawdata_sar, 'dif_new', 'dea_new')
 
     # ================================ 找出买卖点================================================
     # 1.先找出SAR金叉的买卖点
