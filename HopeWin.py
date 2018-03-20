@@ -113,8 +113,8 @@ def HopeWin(symbolInfo,setname,K_MIN_SAR,K_MIN_MACD,startdate,enddate,macdParaSe
     #SAR金叉做多，死叉做空
     #做多过滤：MACD处于金叉期间且DIF>=0
     #做空过滤：MACD处于死叉期间且DIF<0
-    openlongindex = rawdata_sar.loc[(rawdata_sar['SAR_R'] == 1) & (rawdata_sar['MACD_True'] == 1) ].index
-    openshortindex = rawdata_sar.loc[(rawdata_sar['SAR_R'] == -1) & (rawdata_sar['MACD_True'] == -1) ].index
+    openlongindex = rawdata_sar.loc[(rawdata_sar['SAR_R'] == 1) & (rawdata_sar['MACD_True'] == 1) &(rawdata_sar['DIF']>=0)].index
+    openshortindex = rawdata_sar.loc[(rawdata_sar['SAR_R'] == -1) & (rawdata_sar['MACD_True'] == -1) & (rawdata_sar['DIF']<0)].index
 
     # 从多仓序列中取出开多序号的内容，即为开多操作
     longopr = longcrosslist.loc[openlongindex]
