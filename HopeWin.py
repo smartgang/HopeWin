@@ -75,7 +75,7 @@ def HopeWin(symbolInfo,setname,K_MIN_SAR,K_MIN_MACD,startdate,enddate,macdParaSe
     '''
     rawdata_sar=prepareMACD(rawdata_sar,rawdata_macd,MACD_S,MACD_L,MACD_M)
     # 计算MACD的金叉和死叉
-    rawdata_sar['MACD_True'], rawdata_sar['MACD_Cross'] = MA.dfCross(rawdata_sar, 'dif_new', 'dea_new')
+    rawdata_sar['MACD_True'], rawdata_sar['MACD_Cross'] = MA.dfCross(rawdata_sar, 'DIF', 'DEA')
 
     # ================================ 找出买卖点================================================
     # 1.先找出SAR金叉的买卖点
@@ -113,8 +113,8 @@ def HopeWin(symbolInfo,setname,K_MIN_SAR,K_MIN_MACD,startdate,enddate,macdParaSe
     #SAR金叉做多，死叉做空
     #做多过滤：MACD处于金叉期间且DIF>=0
     #做空过滤：MACD处于死叉期间且DIF<0
-    openlongindex = rawdata_sar.loc[(rawdata_sar['SAR_R'] == 1) & (rawdata_sar['MACD_True'] == 1) & (rawdata_sar['DIF'] >= 0)].index
-    openshortindex = rawdata_sar.loc[(rawdata_sar['SAR_R'] == -1) & (rawdata_sar['MACD_True'] == -1) & (rawdata_sar['DIF'] < 0)].index
+    openlongindex = rawdata_sar.loc[(rawdata_sar['SAR_R'] == 1) & (rawdata_sar['MACD_True'] == 1) ].index
+    openshortindex = rawdata_sar.loc[(rawdata_sar['SAR_R'] == -1) & (rawdata_sar['MACD_True'] == -1) ].index
 
     # 从多仓序列中取出开多序号的内容，即为开多操作
     longopr = longcrosslist.loc[openlongindex]
