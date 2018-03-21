@@ -115,13 +115,18 @@ def HopeWin(symbolInfo,setname,K_MIN_SAR,K_MIN_MACD,startdate,enddate,macdParaSe
     #SAR金叉做多，死叉做空
     #做多过滤：MACD处于金叉期间且DIF>=0
     #做空过滤：MACD处于死叉期间且DIF<0
-    openlongindex = rawdata_sar.loc[
-        (rawdata_sar['SAR_R'] == 1) & (rawdata_sar['MACD_True'] == 1) & (rawdata_sar['DIF'] >= 0) & (
-        rawdata_sar['boll_filter'] == 1)].index
-    openshortindex = rawdata_sar.loc[
-        (rawdata_sar['SAR_R'] == -1) & (rawdata_sar['MACD_True'] == -1) & (rawdata_sar['DIF'] < 0) & (
-        rawdata_sar['boll_filter'] == 1)].index
-
+    if bollFilter:
+        openlongindex = rawdata_sar.loc[
+            (rawdata_sar['SAR_R'] == 1) & (rawdata_sar['MACD_True'] == 1) & (rawdata_sar['DIF'] >= 0) & (
+            rawdata_sar['boll_filter'] == 1)].index
+        openshortindex = rawdata_sar.loc[
+            (rawdata_sar['SAR_R'] == -1) & (rawdata_sar['MACD_True'] == -1) & (rawdata_sar['DIF'] < 0) & (
+            rawdata_sar['boll_filter'] == 1)].index
+    else:
+        openlongindex = rawdata_sar.loc[
+            (rawdata_sar['SAR_R'] == 1) & (rawdata_sar['MACD_True'] == 1) & (rawdata_sar['DIF'] >= 0) ].index
+        openshortindex = rawdata_sar.loc[
+            (rawdata_sar['SAR_R'] == -1) & (rawdata_sar['MACD_True'] == -1) & (rawdata_sar['DIF'] < 0)].index
     # 从多仓序列中取出开多序号的内容，即为开多操作
     longopr = longcrosslist.loc[openlongindex]
     longopr['tradetype'] = 1
@@ -236,6 +241,7 @@ if __name__=='__main__':
     MACD_LONG = 30
     MACD_M = 9
     # BOLL参数
+    bollFilter=False
     BOLL_N = 26
     BOLL_M = 26
     BOLL_P = 2
@@ -268,11 +274,12 @@ if __name__=='__main__':
     SARlist, reversal = SAR.SAR(rawdata_sar['high'], rawdata_sar['low'], AF_Step, AF_MAX)
     rawdata_sar['SAR'] = SARlist
     rawdata_sar['SAR_R'] = reversal
-    rawdata_sar['TR'], rawdata_sar['ATR'] = ATR(rawdata_sar['high'], rawdata_sar['low'], rawdata_sar['close'], ATR_N)
-    rawdata_sar['Boll_Mid'], rawdata_sar['Boll_Top'], rawdata_sar['Boll_Bottom'] = BOLL(rawdata_sar['close'], BOLL_N,
-                                                                                        BOLL_M, BOLL_P)
-    rawdata_sar['boll_filter'] = -1
-    rawdata_sar.loc[(rawdata_sar['Boll_Top'] - rawdata_sar['Boll_Mid']) >= 2 * rawdata_sar['ATR'], 'boll_filter'] = 1
+    if bollFilter:
+        rawdata_sar['TR'], rawdata_sar['ATR'] = ATR(rawdata_sar['high'], rawdata_sar['low'], rawdata_sar['close'], ATR_N)
+        rawdata_sar['Boll_Mid'], rawdata_sar['Boll_Top'], rawdata_sar['Boll_Bottom'] = BOLL(rawdata_sar['close'], BOLL_N,
+                                                                                            BOLL_M, BOLL_P)
+        rawdata_sar['boll_filter'] = -1
+        rawdata_sar.loc[(rawdata_sar['Boll_Top'] - rawdata_sar['Boll_Mid']) >= 2 * rawdata_sar['ATR'], 'boll_filter'] = 1
     rawdata_sar.to_csv('rawdata_sar.csv')
 
     # 多进程优化，启动一个对应CPU核心数量的进程池
