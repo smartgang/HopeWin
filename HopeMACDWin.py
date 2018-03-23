@@ -107,6 +107,7 @@ def HopeMACDWin(symbolInfo,setname,K_MIN_MACD,startdate,enddate,macdParaSet,cont
 
     # 结果分析
     result = pd.concat([longlist, shortlist])
+    result = result.set_index(pd.Index(result['openindex']), drop=True)
     result = result.sort_index()
     result = result.reset_index(drop=True)
     result.drop(result.shape[0] - 1, inplace=True)
@@ -183,7 +184,7 @@ if __name__=='__main__':
     sec_id='I'
     K_MIN_MACD = 900
     symbol = '.'.join([exchange_id, sec_id])
-    startdate='2016-01-01'
+    startdate='2017-01-01'
     enddate = '2017-12-31'
 
 
