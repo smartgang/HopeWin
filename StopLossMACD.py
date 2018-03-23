@@ -35,8 +35,8 @@ def getDSL(symbolInfo,K_MIN_MACD,stoplossList,parasetlist,bar1m,barxm):
         l = []
         for sn in range(0, paranum):
             setname = parasetlist.ix[sn,'Setname']
-           # l.append(dsl.dslCal(symbol, setname, bar1m, barxm,pricetick,slip, stoplossTarget, dslFolderName + '\\'))
-            l.append(pool.apply_async(dsl.dslCal,(symbol, setname, bar1m, barxm,pricetick,slip, stoplossTarget, dslFolderName + '\\')))
+            #l.append(dsl.dslCal(symbol, K_MIN_MACD,setname, bar1m, barxm,pricetick,slip, stoplossTarget, dslFolderName + '\\'))
+            l.append(pool.apply_async(dsl.dslCal,(symbol,K_MIN_MACD, setname, bar1m, barxm,pricetick,slip, stoplossTarget, dslFolderName + '\\')))
         pool.close()
         pool.join()
 
@@ -148,21 +148,21 @@ def getDslOwnl(symbolInfo,K_MIN_MACD,parasetlist,stoplossList,winSwitchList):
 
 if __name__=='__main__':
     #参数配置
-    exchange_id = 'DCE'
-    sec_id='I'
+    exchange_id = 'SHFE'
+    sec_id='RB'
     symbol = '.'.join([exchange_id, sec_id])
     K_MIN_MACD = 3600
     symbolinfo=DC.SymbolInfo(symbol)
     slip=DC.getSlip(symbol)
     pricetick=DC.getPriceTick(symbol)
-    starttime='2016-01-01'
+    starttime='2010-01-01'
     endtime='2017-12-31'
     #tickstarttime='2016-01-01'
     #tickendtime='2017-12-31'
     #计算控制开关
     calcDsl=True
-    calcOwnl=True
-    calcDslOwnl=True
+    calcOwnl=False
+    calcDslOwnl=False
 
     #优化参数
     dslStep=-0.002
@@ -193,7 +193,7 @@ if __name__=='__main__':
     bar1m.loc[bar1m['open']>bar1m['close'],'shortLow']=bar1m['lowshift1']
 
     os.chdir(oprresultpath)
-    parasetlist=pd.read_csv(resultpath+'MACDParameterSet.csv')
+    parasetlist=pd.read_csv(resultpath+'MACDParameterSet2.csv')
     paranum=parasetlist.shape[0]
 
     if calcDsl:
