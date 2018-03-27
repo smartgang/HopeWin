@@ -31,23 +31,30 @@ def getDSL(symbolInfo,K_MIN_MACD,stoplossList,parasetlist,bar1m,barxm):
             pass
         print ("stoplossTarget:%f" % stoplossTarget)
 
-        pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
-        l = []
-        for sn in range(0, paranum):
-            setname = parasetlist.ix[sn,'Setname']
-            #l.append(dsl.dslCal(symbol, K_MIN_MACD,setname, bar1m, barxm,pricetick,slip, stoplossTarget, dslFolderName + '\\'))
-            l.append(pool.apply_async(dsl.dslCal,(symbol,K_MIN_MACD, setname, bar1m, barxm,pricetick,slip, stoplossTarget, dslFolderName + '\\')))
-        pool.close()
-        pool.join()
+        resultdf = pd.DataFrame(
+            columns=['setname', 'slTarget', 'worknum', 'old_endcash', 'old_Annual', 'old_Sharpe', 'old_Drawback',
+                     'old_SR',
+                     'new_endcash', 'new_Annual', 'new_Sharpe', 'new_Drawback', 'new_SR', 'maxSingleLoss',
+                     'maxSingleDrawBack'])
+        numlist = range(0, paranum, 200)
+        numlist.append(paranum)
+        for n in range(1,len(numlist)):#按200个分组
+            pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
+            l = []
+            for sn in range(numlist[n-1],numlist[n]):#小组里循环
+                print sn
+                setname = parasetlist.ix[sn,'Setname']
+                #l.append(dsl.dslCal(symbol, K_MIN_MACD,setname, bar1m, barxm,pricetick,slip, stoplossTarget, dslFolderName + '\\'))
+                l.append(pool.apply_async(dsl.dslCal,(symbol,K_MIN_MACD, setname, bar1m, barxm,pricetick,slip, stoplossTarget, dslFolderName + '\\')))
+            pool.close()
+            pool.join()
 
-        resultdf=pd.DataFrame(columns=['setname','slTarget','worknum','old_endcash','old_Annual','old_Sharpe','old_Drawback','old_SR',
-                                                  'new_endcash','new_Annual','new_Sharpe','new_Drawback','new_SR','maxSingleLoss','maxSingleDrawBack'])
-        i = 0
-        for res in l:
-            resultdf.loc[i]=res.get()
-            allresultdf.loc[allnum]=resultdf.loc[i]
-            i+=1
-            allnum+=1
+            i=numlist[n-1]
+            for res in l:
+                resultdf.loc[i]=res.get()
+                allresultdf.loc[allnum]=resultdf.loc[i]
+                i+=1
+                allnum+=1
         resultdf['cashDelta']=resultdf['new_endcash']-resultdf['old_endcash']
         resultdf.to_csv(dslFolderName+'\\'+symbol+str(K_MIN_MACD)+' finalresult_dsl'+str(stoplossTarget)+'.csv')
 
