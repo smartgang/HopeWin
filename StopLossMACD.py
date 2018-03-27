@@ -155,6 +155,7 @@ def getDslOwnl(symbolInfo,K_MIN_MACD,parasetlist,stoplossList,winSwitchList):
 
 if __name__=='__main__':
     #参数配置
+    strategyName='Hope_MACD_MA'
     exchange_id = 'SHFE'
     sec_id='RB'
     symbol = '.'.join([exchange_id, sec_id])
@@ -182,7 +183,7 @@ if __name__=='__main__':
 
     #文件路径
     upperpath=DC.getUpperPath(1)
-    foldername = ' '.join([exchange_id, sec_id,str(K_MIN_MACD)])
+    foldername = ' '.join([strategyName,exchange_id, sec_id,str(K_MIN_MACD)])
     resultpath = upperpath + "\\Results\\"
     oprresultpath=resultpath+foldername
 
