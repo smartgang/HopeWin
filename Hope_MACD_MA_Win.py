@@ -223,6 +223,7 @@ if __name__=='__main__':
     rawdata_macd = DC.getBarData(symbol, K_MIN, startdate + " 00:00:00", enddate + " 23:59:59")
     # 取跨合约数据
     contractswaplist = DC.getContractSwaplist(symbol)
+    swaplist = np.array(contractswaplist.swaputc)
 
     # 多进程优化，启动一个对应CPU核心数量的进程池
     pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
@@ -243,7 +244,7 @@ if __name__=='__main__':
             'MA_N':ma_n
         }
         #HopeWin(symbolInfo, setname, K_MIN_SAR, K_MIN_MACD, startdate, enddate, macdParaSet, contractswaplist)
-        l.append(pool.apply_async(HopeWin_MACD_MA,(symbolInfo,setname,K_MIN,startdate,enddate,macdParaSet,contractswaplist)))
+        l.append(pool.apply_async(HopeWin_MACD_MA,(symbolInfo,setname,K_MIN,startdate,enddate,macdParaSet,swaplist)))
     pool.close()
     pool.join()
 

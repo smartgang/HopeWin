@@ -270,6 +270,8 @@ if __name__=='__main__':
     #rawdata_macd = DC.getBarData(symbol, K_MIN_MACD, startdate + " 00:00:00", enddate + " 23:59:59")
     # 取跨合约数据
     contractswaplist = DC.getContractSwaplist(symbol)
+    swaplist = np.array(contractswaplist.swaputc)
+
     # 计算SAR
     SARlist, reversal = SAR.SAR(rawdata_sar['high'], rawdata_sar['low'], AF_Step, AF_MAX)
     rawdata_sar['SAR'] = SARlist
@@ -299,7 +301,7 @@ if __name__=='__main__':
             'MACD_M': macd_m,
         }
         #HopeWin(symbolInfo, setname, K_MIN_SAR, K_MIN_MACD, startdate, enddate, macdParaSet, contractswaplist)
-        l.append(pool.apply_async(HopeWin,(symbolInfo,setname,K_MIN_SAR,K_MIN_MACD,bollFilter,startdate,enddate,macdParaSet,contractswaplist)))
+        l.append(pool.apply_async(HopeWin,(symbolInfo,setname,K_MIN_SAR,K_MIN_MACD,bollFilter,startdate,enddate,macdParaSet,swaplist)))
     pool.close()
     pool.join()
 

@@ -212,6 +212,7 @@ if __name__=='__main__':
     symbolInfo = DC.SymbolInfo(symbol)
     # 取跨合约数据
     contractswaplist = DC.getContractSwaplist(symbol)
+    swaplist = np.array(contractswaplist.swaputc)
 
     # 多进程优化，启动一个对应CPU核心数量的进程池
     pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
@@ -230,7 +231,7 @@ if __name__=='__main__':
             'MACD_M': macd_m,
         }
         #HopeMACDWin(symbolInfo, setname, K_MIN_MACD, startdate, enddate, macdParaSet, contractswaplist)
-        l.append(pool.apply_async(HopeMACDWin,(symbolInfo,setname,K_MIN_MACD,startdate,enddate,macdParaSet,contractswaplist)))
+        l.append(pool.apply_async(HopeMACDWin,(symbolInfo,setname,K_MIN_MACD,startdate,enddate,macdParaSet,swaplist)))
     pool.close()
     pool.join()
 
