@@ -180,6 +180,7 @@ def HopeMACDWin(symbolInfo,setname,K_MIN_MACD,startdate,enddate,macdParaSet,cont
 if __name__=='__main__':
     #====================参数和文件夹设置======================================
     #参数设置
+    strategyName = 'Hope_MACD'
     exchange_id = 'DCE'
     sec_id='I'
     K_MIN_MACD = 900
@@ -195,7 +196,7 @@ if __name__=='__main__':
 
     #文件路径
     upperpath=DC.getUpperPath(1)
-    foldername = ' '.join([exchange_id, sec_id,str(K_MIN_MACD)])
+    foldername = ' '.join([strategyName,exchange_id, sec_id,str(K_MIN_MACD)])
     resultpath=upperpath+"\\Results\\"
     os.chdir(resultpath)
     try:
