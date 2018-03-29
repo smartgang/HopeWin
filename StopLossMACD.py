@@ -129,7 +129,7 @@ def getDslOwnl(symbolInfo,K_MIN_MACD,parasetlist,stoplossList,winSwitchList):
             for sn in range(0, paranum):
                 setname = parasetlist.ix[sn, 'Setname']
                 l.append(pool.apply_async(dslownl.dslAndownlCal,
-                                                  (symbol, setname, stoplossTarget, winSwitch, slip, dslFolderName,
+                                                  (symbol, K_MIN_MACD,setname, stoplossTarget, winSwitch, slip, dslFolderName,
                                                    ownlFolderName, newfolder + '\\')))
             pool.close()
             pool.join()
