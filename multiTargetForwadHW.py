@@ -34,7 +34,7 @@ if __name__=='__main__':
         resultfilesuffix= 'result_dsl_ownl.csv'
     else:
         resultfilesuffix='result.csv'
-    monthlyretrsuffix = 'monthly_retr_new.csv'  # 前面不带下划线,正常:monthly_retr.csv,双止损:monthly_retr_new.csv
+    #monthlyretrsuffix = 'monthly_retr_new.csv'  # 前面不带下划线,正常:monthly_retr.csv,双止损:monthly_retr_new.csv
     colslist = mtf.getColumnsName(dsl or ownl or dslownl)
 
     # ============================================文件路径========================================================
@@ -90,7 +90,7 @@ if __name__=='__main__':
     pool.close()
     pool.join()
 
-    mtf.calGrayResult(symbol, K_MIN_SAR, windowsSet, forwardrankpath, rawdatapath, monthlyfilesuffix=monthlyretrsuffix)
+    mtf.calGrayResult(symbol, K_MIN_SAR, windowsSet, forwardrankpath, rawdatapath)
 
     mtf.calOprResult(rawdatapath, symbol, K_MIN_SAR, nextmonth, columns=colslist, resultfilesuffix=resultfilesuffix)
     endtime = datetime.now()
