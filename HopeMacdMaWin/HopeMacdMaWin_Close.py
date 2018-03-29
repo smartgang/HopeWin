@@ -9,6 +9,7 @@ import os
 import numpy as np
 import multiprocessing
 import datetime
+import HopeMacdMaWin_Parameter
 
 def getDSL(symbolInfo,K_MIN_MACD,stoplossList,parasetlist,bar1m,barxm):
     symbol=symbolInfo.symbol
@@ -154,41 +155,39 @@ def getDslOwnl(symbolInfo,K_MIN_MACD,parasetlist,stoplossList,winSwitchList):
 
 if __name__=='__main__':
     #参数配置
-    strategyName='Hope_MACD_MA'
-    exchange_id = 'SHFE'
-    sec_id='RB'
+    strategyName=HopeMacdMaWin_Parameter.strategyName
+    exchange_id = HopeMacdMaWin_Parameter.exchange_id
+    sec_id = HopeMacdMaWin_Parameter.sec_id
+    K_MIN = HopeMacdMaWin_Parameter.K_MIN
+    startdate = HopeMacdMaWin_Parameter.startdate
+    enddate = HopeMacdMaWin_Parameter.enddate
     symbol = '.'.join([exchange_id, sec_id])
-    K_MIN_MACD = 3600
+
     symbolinfo=DC.SymbolInfo(symbol)
     slip=DC.getSlip(symbol)
     pricetick=DC.getPriceTick(symbol)
-    starttime='2010-01-01'
-    endtime='2017-12-31'
-    #tickstarttime='2016-01-01'
-    #tickendtime='2017-12-31'
+
     #计算控制开关
-    calcDsl=True
-    calcOwnl=False
-    calcDslOwnl=False
+    calcDsl = HopeMacdMaWin_Parameter.calcDsl_close
+    calcOwnl = HopeMacdMaWin_Parameter.calcOwnl_close
+    calcDslOwnl = HopeMacdMaWin_Parameter.calcDslOwnl_close
 
     #优化参数
-    dslStep=-0.002
-    #stoplossList = np.arange(-0.010, -0.042, dslStep)
-    stoplossList=[-0.022]
-    ownlStep=0.001
-    #winSwitchList = np.arange(0.003, 0.011, ownlStep)
-    winSwitchList=[0.009]
-    nolossThreshhold = 3 * pricetick
+    dslStep = HopeMacdMaWin_Parameter.dslStep_close
+    stoplossList = np.arange(HopeMacdMaWin_Parameter.dslTargetStart_close, HopeMacdMaWin_Parameter.dslTargetEnd_close, dslStep)
+    ownlStep = HopeMacdMaWin_Parameter.ownlStep_close
+    winSwitchList = np.arange(HopeMacdMaWin_Parameter.ownlTargetStart_close,HopeMacdMaWin_Parameter.ownltargetEnd_close, ownlStep)
+    nolossThreshhold = HopeMacdMaWin_Parameter.nolossThreshhold_close * pricetick
 
     #文件路径
-    upperpath=DC.getUpperPath(1)
-    foldername = ' '.join([strategyName,exchange_id, sec_id,str(K_MIN_MACD)])
+    upperpath=DC.getUpperPath(2)
+    foldername = ' '.join([strategyName,exchange_id, sec_id,str(K_MIN)])
     resultpath = upperpath + "\\Results\\"
     oprresultpath=resultpath+foldername
 
     #原始数据处理
-    bar1m=DC.getBarData(symbol=symbol,K_MIN=60,starttime=starttime+' 00:00:00',endtime=endtime+' 23:59:59')
-    barxm=DC.getBarData(symbol=symbol,K_MIN=K_MIN_MACD,starttime=starttime+' 00:00:00',endtime=endtime+' 23:59:59')
+    bar1m=DC.getBarData(symbol=symbol,K_MIN=60,starttime=startdate+' 00:00:00',endtime=enddate+' 23:59:59')
+    barxm=DC.getBarData(symbol=symbol,K_MIN=K_MIN,starttime=startdate+' 00:00:00',endtime=enddate+' 23:59:59')
     #bar1m计算longHigh,longLow,shortHigh,shortLow
     bar1m['longHigh']=bar1m['high']
     bar1m['shortHigh']=bar1m['high']
@@ -200,14 +199,14 @@ if __name__=='__main__':
     bar1m.loc[bar1m['open']>bar1m['close'],'shortLow']=bar1m['lowshift1']
 
     os.chdir(oprresultpath)
-    parasetlist=pd.read_csv(resultpath+'MACDParameterSet2.csv')
+    parasetlist=pd.read_csv(resultpath+HopeMacdMaWin_Parameter.parasetname)
     paranum=parasetlist.shape[0]
 
     if calcDsl:
-        getDSL(symbolinfo, K_MIN_MACD, stoplossList, parasetlist, bar1m,barxm)
+        getDSL(symbolinfo, K_MIN, stoplossList, parasetlist, bar1m,barxm)
 
     if calcOwnl:
-        getOwnl(symbolinfo,K_MIN_MACD,winSwitchList,nolossThreshhold,parasetlist,bar1m,barxm)
+        getOwnl(symbolinfo,K_MIN,winSwitchList,nolossThreshhold,parasetlist,bar1m,barxm)
 
     if calcDslOwnl:
-        getDslOwnl(symbolinfo,K_MIN_MACD,parasetlist,stoplossList,winSwitchList)
+        getDslOwnl(symbolinfo,K_MIN,parasetlist,stoplossList,winSwitchList)
