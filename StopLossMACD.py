@@ -83,8 +83,7 @@ def getOwnl(symbolInfo,K_MIN_MACD,winSwitchList,nolossThreshhold,parasetlist,bar
         l = []
         for sn in range(0, paranum):
             setname = parasetlist.ix[sn,'Setname']
-           # l.append(dsl.dslCal(symbol,setname, bar1m, barxm,pricetick,slip, stoplossTarget, dslFolderName + '\\'))
-            l.append(pool.apply_async(ownl.ownlCal,(symbol, setname, bar1m, barxm, winSwitch, nolossThreshhold, slip,
+            l.append(pool.apply_async(ownl.ownlCal,(symbol,K_MIN_MACD,setname, bar1m, barxm, winSwitch, nolossThreshhold, slip,
                          ownlFolderName + '\\')))
         pool.close()
         pool.join()
@@ -188,8 +187,8 @@ if __name__=='__main__':
     oprresultpath=resultpath+foldername
 
     #原始数据处理
-    bar1m=DC.getBarData(symbol=symbol,K_MIN=60,starttime=starttime+' 00:00:00',endtime=endtime+' 00:00:00')
-    barxm=DC.getBarData(symbol=symbol,K_MIN=K_MIN_MACD,starttime=starttime+' 00:00:00',endtime=endtime+' 00:00:00')
+    bar1m=DC.getBarData(symbol=symbol,K_MIN=60,starttime=starttime+' 00:00:00',endtime=endtime+' 23:59:59')
+    barxm=DC.getBarData(symbol=symbol,K_MIN=K_MIN_MACD,starttime=starttime+' 00:00:00',endtime=endtime+' 23:59:59')
     #bar1m计算longHigh,longLow,shortHigh,shortLow
     bar1m['longHigh']=bar1m['high']
     bar1m['shortHigh']=bar1m['high']
