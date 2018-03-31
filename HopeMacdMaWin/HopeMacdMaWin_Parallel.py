@@ -99,7 +99,6 @@ if __name__=='__main__':
             'K_MIN': HopeMacdMaWin_Parameter.K_MIN,
             'startdate': HopeMacdMaWin_Parameter.startdate,
             'enddate': HopeMacdMaWin_Parameter.enddate,
-            'symbol': '.'.join([HopeMacdMaWin_Parameter.exchange_id, HopeMacdMaWin_Parameter.sec_id])
         }
         strategyParameterSet.append(paradic)
     else:
@@ -116,7 +115,6 @@ if __name__=='__main__':
                 'K_MIN': symbolset.ix[i, 'K_MIN'],
                 'startdate': symbolset.ix[i, 'startdate'],
                 'enddate': symbolset.ix[i, 'enddate'],
-                'symbol': '.'.join([exchangeid, secid])
             }
             )
 
@@ -127,7 +125,7 @@ if __name__=='__main__':
     for strategyParameter in strategyParameterSet:
         r = getParallelResult(strategyParameter, resultpath, parasetlist, paranum)
         r['strategyName'] = strategyParameter['strategyName']
-        r['exhange_id'] = strategyParameter['exchange_id']
+        r['exchange_id'] = strategyParameter['exchange_id']
         r['sec_id'] = strategyParameter['sec_id']
         r['K_MIN'] = strategyParameter['K_MIN']
         allsymbolresult = pd.concat([allsymbolresult, r])

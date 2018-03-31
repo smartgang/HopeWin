@@ -86,7 +86,7 @@ if __name__=='__main__':
     windowsSet = range(HopeMacdMaWin_Parameter.forwardWinStart, HopeMacdMaWin_Parameter.forwardWinEnd + 1)  # 白区窗口值
     # ======================================参数配置===================================================
     strategyParameterSet = []
-    if not HopeMacdMaWin_Parameter.forward_set_filename:
+    if not HopeMacdMaWin_Parameter.symbol_KMIN_opt_swtich:
         # 单品种单周期模式
         paradic = {
             'strategyName': HopeMacdMaWin_Parameter.strategyName,
@@ -96,8 +96,7 @@ if __name__=='__main__':
             'startdate': HopeMacdMaWin_Parameter.startdate,
             'enddate': HopeMacdMaWin_Parameter.enddate,
             'nextmonth':HopeMacdMaWin_Parameter.nextMonthName,
-            'symbol': '.'.join([HopeMacdMaWin_Parameter.exchange_id, HopeMacdMaWin_Parameter.sec_id]),
-            'commonForwadrd': HopeMacdMaWin_Parameter.common_forward,
+            'commonForward': HopeMacdMaWin_Parameter.common_forward,
             'calcDsl': HopeMacdMaWin_Parameter.calcDsl_forward,
             'calcOwnl': HopeMacdMaWin_Parameter.calcOwnl_forward,
             'calcDslOwnl': HopeMacdMaWin_Parameter.calcDslOwnl_forward,
@@ -112,7 +111,7 @@ if __name__=='__main__':
         strategyParameterSet.append(paradic)
     else:
         # 多品种多周期模式
-        symbolset = pd.read_excel(resultpath + HopeMacdMaWin_Parameter.stoploss_set_filename,index_col='No')
+        symbolset = pd.read_excel(resultpath + HopeMacdMaWin_Parameter.forward_set_filename,index_col='No')
         symbolsetNum = symbolset.shape[0]
         for i in range(symbolsetNum):
             exchangeid = symbolset.ix[i, 'exchange_id']
@@ -125,7 +124,6 @@ if __name__=='__main__':
                 'startdate': symbolset.ix[i, 'startdate'],
                 'enddate': symbolset.ix[i, 'enddate'],
                 'nextmonth':symbolset.ix[i,'nextmonth'],
-                'symbol': '.'.join([exchangeid, secid]),
                 'commonForward':symbolset.ix[i,'commonForward'],
                 'calcDsl': symbolset.ix[i, 'calcDsl'],
                 'calcOwnl': symbolset.ix[i, 'calcOwnl'],

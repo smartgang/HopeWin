@@ -53,10 +53,8 @@ symbol_KMIN_opt_swtich=True
 symbol_KMIN_set_filename=strategyName+'_symbol_KMIN_set.xlsx'
 #2.第一步的结果中挑出满足要求的项，做成双止损组合文件
 stoploss_set_filename=strategyName+'_stoploss_set.xlsx'
-#3.第二步结果中挑出满足要求的项，做双止损同时生效的组合文件
-stoploss_set2_filename=strategyName+'_stoploss_set2.csv'
-#4.从第二、第三步的结果中挑出满足要求的项，做推进
-forward_set_filename=strategyName+'_forward_set.csv'
+#3.从第二步的结果中挑出满足要求的项，做推进
+forward_set_filename=strategyName+'_forward_set.xlsx'
 
 #====================系统参数==================================
 folderLevel = 2
