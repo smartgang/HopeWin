@@ -201,7 +201,7 @@ if __name__=='__main__':
     MA_N=30
 
     #文件路径
-    upperpath=DC.getUpperPath(1)
+    upperpath=DC.getUpperPath(2)
     foldername = ' '.join([strategyName,exchange_id, sec_id, str(K_MIN)])
     resultpath=upperpath+"\\Results\\"
     os.chdir(resultpath)

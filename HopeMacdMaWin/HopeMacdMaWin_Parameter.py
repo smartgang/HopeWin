@@ -45,7 +45,19 @@ ownltargetEnd_forward = 0.010
 #dsl_ownl set:dsl在前，ownl在后
 dsl_ownl_set=[[-0.020,0.009],[-0.018,0.009]]
 
-#============================================
-#品种集和周期集，只在多品种多周期优化回测中起作用
-symbol_Set=['SHFE.RB','DCE.I']
-K_MIN_Set = [600,900,3600]
+#===============多品种多周期优化参数=============================
+#多品种多周期优化开关，打开后代码会从下面标识的文件中导入参数
+symbol_KMIN_opt_swtich=True
+
+#1.品种和周期组合文件
+symbol_KMIN_set_filename=strategyName+'_symbol_KMIN_set.xlsx'
+#2.第一步的结果中挑出满足要求的项，做成双止损组合文件
+stoploss_set_filename=strategyName+'_stoploss_set.xlsx'
+#3.第二步结果中挑出满足要求的项，做双止损同时生效的组合文件
+stoploss_set2_filename=strategyName+'_stoploss_set2.csv'
+#4.从第二、第三步的结果中挑出满足要求的项，做推进
+forward_set_filename=strategyName+'_forward_set.csv'
+
+#====================系统参数==================================
+folderLevel = 2
+resultFolderName = '\\Results\\'
