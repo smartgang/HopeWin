@@ -65,7 +65,7 @@ def getParallelResult(strategyParameter,resultpath,parasetlist,paranum):
             'MACD_M': macd_m,
             'MA_N':ma_n
         }
-        l.append(pool.apply_async(getParallelResult,(symbolInfo,K_MIN,setname,rawdata,macdParaSet,swaplist)))
+        l.append(pool.apply_async(getResult,(symbolInfo,K_MIN,setname,rawdata,macdParaSet,swaplist)))
     pool.close()
     pool.join()
 
