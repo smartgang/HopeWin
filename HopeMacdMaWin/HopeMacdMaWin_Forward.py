@@ -162,7 +162,7 @@ if __name__=='__main__':
 
         #文件路径
         foldername = ' '.join([strategyName,exchange_id, sec_id, str(K_MIN)])
-        folderpath=resultpath+foldername
+        folderpath=resultpath+foldername+'\\'
         os.chdir(folderpath)
 
         parasetlist = pd.read_csv(resultpath + HopeMacdMaWin_Parameter.parasetname)
