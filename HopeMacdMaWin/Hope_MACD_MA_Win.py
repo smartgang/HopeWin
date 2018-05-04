@@ -34,13 +34,13 @@ def removeContractSwap(resultlist,contractswaplist):
     results = results.reset_index(drop=True)
     return results
 
-def HopeWin_MACD_MA(symbolInfo,setname,K_MIN,rawdata_macd,macdParaSet,contractswaplist,calcResult=True):
-    print setname
+def HopeWin_MACD_MA(symbolinfo,rawdata_macd,macdParaSet,positionRatio,initialCash,contractswaplist,calcResult=True):
+    setname=macdParaSet['Setname']
     MACD_S=macdParaSet['MACD_S']
     MACD_L = macdParaSet['MACD_L']
     MACD_M = macdParaSet['MACD_M']
     MA_N = macdParaSet['MA_N']
-
+    print setname
     # 计算MACD
     macd = MA.calMACD(rawdata_macd['close'], MACD_S, MACD_L, MACD_M)
     rawdata_macd['DIF'] = macd[0]
@@ -118,44 +118,19 @@ def HopeWin_MACD_MA(symbolInfo,setname,K_MIN,rawdata_macd,macdParaSet,contractsw
     result.drop(result.shape[0] - 1, inplace=True)
     # 去掉跨合约的操作
     result = removeContractSwap(result, contractswaplist)
-    initial_cash = 20000
-    margin_rate = 0.2
-    slip = symbolInfo.getSlip()
-    multiplier = symbolInfo.getMultiplier()
-    poundgeType, poundgeFee, poundgeRate = symbolInfo.getPoundage()
 
+    slip = symbolinfo.getSlip()
     result['ret'] = ((result['closeprice'] - result['openprice']) * result['tradetype']) - slip
     result['ret_r'] = result['ret'] / result['openprice']
-    results={}
+    results = {}
+
     if calcResult:
-        firsttradecash = initial_cash / margin_rate
-        result['commission_fee'] = 0
-        if poundgeType == symbolInfo.POUNDGE_TYPE_RATE:
-            result.ix[0, 'commission_fee'] = firsttradecash * poundgeRate * 2
-        else:
-            result.ix[0, 'commission_fee'] = firsttradecash / (multiplier * result.ix[0, 'openprice']) * poundgeFee * 2
-        result['per earn'] = 0  # 单笔盈亏
-        result['own cash'] = 0  # 自有资金线
-        result['trade money'] = 0  # 杠杆后的可交易资金线
+        result['commission_fee'], result['per earn'], result['own cash'], result['hands'] = RS.calcResult(result,
+                                                                                                          symbolinfo,
+                                                                                                          initialCash,
+                                                                                                          positionRatio)
 
-        result.ix[0, 'per earn'] = firsttradecash * result.ix[0, 'ret_r']
-        result.ix[0, 'own cash'] = initial_cash + result.ix[0, 'per earn'] - result.ix[0, 'commission_fee']
-        result.ix[0, 'trade money'] = result.ix[0, 'own cash'] / margin_rate
-        oprtimes = result.shape[0]
-        for i in np.arange(1, oprtimes):
-            # 根据手续费类型计算手续费
-            if poundgeType == symbolInfo.POUNDGE_TYPE_RATE:
-                commission = result.ix[i - 1, 'trade money'] * poundgeRate * 2
-            else:
-                commission = result.ix[i - 1, 'trade money'] / (multiplier * result.ix[i, 'openprice']) * poundgeFee * 2
-            perearn = result.ix[i - 1, 'trade money'] * result.ix[i, 'ret_r']
-            owncash = result.ix[i - 1, 'own cash'] + perearn - commission
-            result.ix[i, 'own cash'] = owncash
-            result.ix[i, 'commission_fee'] = commission
-            result.ix[i, 'per earn'] = perearn
-            result.ix[i, 'trade money'] = owncash / margin_rate
-
-        endcash = result.ix[oprtimes - 1, 'own cash']
+        endcash = result['own cash'].iloc[-1]
         Annual = RS.annual_return(result)
         Sharpe = RS.sharpe_ratio(result)
         DrawBack = RS.max_drawback(result)[0]
@@ -164,23 +139,16 @@ def HopeWin_MACD_MA(symbolInfo,setname,K_MIN,rawdata_macd,macdParaSet,contractsw
 
         results = {
             'Setname':setname,
-            'MACD_S':MACD_S,
-            'MACD_L':MACD_L,
-            'MACD_M':MACD_M,
-            'MA_N':MA_N,
-            'opentimes': oprtimes,
+            'opentimes': result.shape[0],
             'end_cash': endcash,
             'SR': SR,
-            'Annual':Annual,
-            'Sharpe':Sharpe,
-            'DrawBack':DrawBack,
+            'Annual': Annual,
+            'Sharpe': Sharpe,
+            'DrawBack': DrawBack,
             'max_single_loss_rate': max_single_loss_rate
         }
-        print results
-    filename = ("%s%d %s result.csv" % (symbolInfo.symbol, K_MIN,setname))
-    result.to_csv(filename)
-    del rawdata_macd
-    return results
+    closeopr = result.loc[:, 'closetime':'tradetype']
+    return result, rawdata_macd, closeopr, results
 
 if __name__=='__main__':
     #====================参数和文件夹设置======================================
@@ -228,7 +196,7 @@ if __name__=='__main__':
     pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
     l = []
     resultlist = pd.DataFrame(columns=
-                              ['Setname', 'MACD_S', 'MACD_L', 'MACD_M','MA_N', 'opentimes', 'end_cash', 'SR', 'Annual','Sharpe','DrawBack',
+                              ['Setname', 'opentimes', 'end_cash', 'SR', 'Annual','Sharpe','DrawBack',
                                'max_single_loss_rate'])
     for i in range(0, paranum):
         setname = parasetlist.ix[i, 'Setname']
@@ -237,13 +205,14 @@ if __name__=='__main__':
         macd_m = parasetlist.ix[i, 'MACD_M']
         ma_n = parasetlist.ix[i,'MA_N']
         macdParaSet = {
+            'Setname':setname,
             'MACD_S': macd_s,
             'MACD_L': macd_l,
             'MACD_M': macd_m,
             'MA_N':ma_n
         }
         #HopeWin(symbolInfo, setname, K_MIN_SAR, K_MIN_MACD, startdate, enddate, macdParaSet, contractswaplist)
-        l.append(pool.apply_async(HopeWin_MACD_MA,(symbolInfo,setname,K_MIN,startdate,enddate,macdParaSet,swaplist)))
+        l.append(pool.apply_async(HopeWin_MACD_MA,(symbolInfo,K_MIN,startdate,enddate,macdParaSet,swaplist)))
     pool.close()
     pool.join()
 

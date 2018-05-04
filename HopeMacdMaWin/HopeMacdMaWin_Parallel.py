@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 '''
-LvyiNoKdJWin策略多进程参数优化
 '''
 import Hope_MACD_MA_Win
 import pandas as pd
@@ -8,11 +7,11 @@ import numpy as np
 import os
 import DATA_CONSTANTS as DC
 import multiprocessing
-import HopeMacdMaWin_Parameter
+import HopeMacdMaWin_Parameter as Parameter
 
-def getResult(symbolinfo,K_MIN,setname,rawdata,para,contractswaplist):
-    result ,df ,closeopr,results = Hope_MACD_MA_Win.HopeWin_MACD_MA(symbolinfo,setname,K_MIN,rawdata,para,contractswaplist)
-    result.to_csv(symbolinfo.symbol + str(K_MIN) + ' ' + setname + ' result.csv')
+def getResult(strategyName,symbolinfo,K_MIN,setname,rawdata,para,positionRatio,initialCash,contractswaplist):
+    result ,df ,closeopr,results = Hope_MACD_MA_Win.HopeWin_MACD_MA(symbolinfo,rawdata,para,positionRatio,initialCash,contractswaplist)
+    result.to_csv(strategyName+' '+symbolinfo.symbol + str(K_MIN) + ' ' + setname + ' result.csv')
     del result
     print results
     return results
@@ -27,8 +26,9 @@ def getParallelResult(strategyParameter,resultpath,parasetlist,paranum):
     startdate = strategyParameter['startdate']
     enddate = strategyParameter['enddate']
     symbol = '.'.join([exchange_id, sec_id])
-
-    # ========================数据准备==============================================
+    positionRatio = strategyParameter['positionRatio']
+    initialCash = strategyParameter['initialCash']
+    # ======================数据准备==============================================
     # 取合约信息
     symbolInfo = DC.SymbolInfo(symbol)
 
@@ -50,7 +50,7 @@ def getParallelResult(strategyParameter,resultpath,parasetlist,paranum):
     pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
     l = []
     resultlist = pd.DataFrame(columns=
-                              ['Setname', 'MACD_S', 'MACD_L', 'MACD_M', 'MA_N', 'opentimes', 'end_cash', 'SR', 'Annual',
+                              ['Setname', 'opentimes', 'end_cash', 'SR', 'Annual',
                                'Sharpe', 'DrawBack',
                                'max_single_loss_rate'])
     for i in range(0, paranum):
@@ -59,13 +59,15 @@ def getParallelResult(strategyParameter,resultpath,parasetlist,paranum):
         macd_l = parasetlist.ix[i, 'MACD_Long']
         macd_m = parasetlist.ix[i, 'MACD_M']
         ma_n = parasetlist.ix[i,'MA_N']
-        macdParaSet = {
+        paraset = {
+            'Setname':setname,
             'MACD_S': macd_s,
             'MACD_L': macd_l,
             'MACD_M': macd_m,
             'MA_N':ma_n
         }
-        l.append(pool.apply_async(getResult,(symbolInfo,K_MIN,setname,rawdata,macdParaSet,swaplist)))
+        #l.append(getResult(symbolInfo, K_MIN, setname, rawdata, paraset, swaplist))
+        l.append(pool.apply_async(getResult, (strategyName,symbolInfo, K_MIN, setname, rawdata, paraset, positionRatio,initialCash,swaplist)))
     pool.close()
     pool.join()
 
@@ -75,36 +77,38 @@ def getParallelResult(strategyParameter,resultpath,parasetlist,paranum):
         resultlist.loc[i] = res.get()
         i += 1
     #print resultlist
-    finalresults = ("%s %d finalresults.csv" % (symbol, K_MIN))
+    finalresults = ("%s %s %d finalresults.csv" % (strategyName,symbol, K_MIN))
     resultlist.to_csv(finalresults)
     return resultlist
 
 if __name__=='__main__':
-    # ====================参数和文件夹设置======================================
-    # 文件路径
-    upperpath = DC.getUpperPath(HopeMacdMaWin_Parameter.folderLevel)
-    resultpath = upperpath + HopeMacdMaWin_Parameter.resultFolderName
+    #====================参数和文件夹设置======================================
+    #文件路径
+    upperpath=DC.getUpperPath(Parameter.folderLevel)
+    resultpath = upperpath + Parameter.resultFolderName
 
     # 取参数集
-    parasetlist = pd.read_csv(resultpath + HopeMacdMaWin_Parameter.parasetname)
+    parasetlist = pd.read_csv(resultpath + Parameter.parasetname)
     paranum = parasetlist.shape[0]
-    # 参数设置
-    strategyParameterSet = []
-    if not HopeMacdMaWin_Parameter.symbol_KMIN_opt_swtich:
-        # 单品种单周期模式
-        paradic = {
-            'strategyName': HopeMacdMaWin_Parameter.strategyName,
-            'exchange_id': HopeMacdMaWin_Parameter.exchange_id,
-            'sec_id': HopeMacdMaWin_Parameter.sec_id,
-            'K_MIN': HopeMacdMaWin_Parameter.K_MIN,
-            'startdate': HopeMacdMaWin_Parameter.startdate,
-            'enddate': HopeMacdMaWin_Parameter.enddate,
+    #参数设置
+    strategyParameterSet=[]
+    if not Parameter.symbol_KMIN_opt_swtich:
+        #单品种单周期模式
+        paradic={
+        'strategyName':Parameter.strategyName,
+        'exchange_id': Parameter.exchange_id,
+        'sec_id': Parameter.sec_id,
+        'K_MIN': Parameter.K_MIN,
+        'startdate': Parameter.startdate,
+        'enddate' : Parameter.enddate,
+        'positionRatio':Parameter.positionRatio,
+        'initialCash': Parameter.initialCash
         }
         strategyParameterSet.append(paradic)
     else:
-        # 多品种多周期模式
-        symbolset = pd.read_excel(resultpath + HopeMacdMaWin_Parameter.symbol_KMIN_set_filename)
-        symbolsetNum = symbolset.shape[0]
+        #多品种多周期模式
+        symbolset = pd.read_excel(resultpath + Parameter.symbol_KMIN_set_filename)
+        symbolsetNum=symbolset.shape[0]
         for i in range(symbolsetNum):
             exchangeid = symbolset.ix[i, 'exchange_id']
             secid = symbolset.ix[i, 'sec_id']
@@ -112,14 +116,16 @@ if __name__=='__main__':
                 'strategyName': symbolset.ix[i, 'strategyName'],
                 'exchange_id': exchangeid,
                 'sec_id': secid,
-                'K_MIN': symbolset.ix[i, 'K_MIN'],
-                'startdate': symbolset.ix[i, 'startdate'],
-                'enddate': symbolset.ix[i, 'enddate'],
+                'K_MIN': symbolset.ix[i,'K_MIN'],
+                'startdate': symbolset.ix[i,'startdate'],
+                'enddate': symbolset.ix[i,'enddate'],
+                'positionRatio' : Parameter.positionRatio,
+                'initialCash' : Parameter.initialCash
             }
             )
 
     allsymbolresult = pd.DataFrame(columns=
-                                   ['Setname', 'MACD_S', 'MACD_L', 'MACD_M', 'MA_N', 'opentimes', 'end_cash', 'SR',
+                                   ['Setname', 'opentimes', 'end_cash', 'SR',
                                     'Annual', 'Sharpe', 'DrawBack', 'max_single_loss_rate'
                                     'strategyName', 'exchange_id', 'sec_id', 'K_MIN'])
     for strategyParameter in strategyParameterSet:
@@ -131,4 +137,4 @@ if __name__=='__main__':
         allsymbolresult = pd.concat([allsymbolresult, r])
     allsymbolresult.reset_index(drop=False, inplace=True)
     os.chdir(resultpath)
-    allsymbolresult.to_csv(HopeMacdMaWin_Parameter.strategyName + "_symbol_KMIN_results.csv")
+    allsymbolresult.to_csv(Parameter.strategyName+"_symbol_KMIN_results.csv")
