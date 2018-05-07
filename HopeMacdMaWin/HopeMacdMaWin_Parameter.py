@@ -39,9 +39,11 @@ forwardWinStart=1
 forwardWinEnd=12
 
 #止损类型开关
+multiSTL_forward=True #多止损混合推进开关（忽略common模式）
 common_forward=False #普通回测结果推进
 calcDsl_forward=False
 calcOwnl_forward=False
+calsFrsl_forward=True
 calcDslOwnl_forward=False
 #dsl参数
 dslStep_forward=-0.002
@@ -51,6 +53,10 @@ dslTargetEnd_forward = -0.042
 ownlStep_forward=0.001
 ownlTargetStart_forward = 0.005
 ownltargetEnd_forward = 0.010
+#frsl参数
+frslStep_forward= -0.001
+frslTargetStart_forward = -0.010
+frslTragetEnd_forward = -0.011
 #dsl_ownl set:dsl在前，ownl在后
 dsl_ownl_set=[[-0.020,0.009],[-0.018,0.009]]
 
