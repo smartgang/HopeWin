@@ -122,14 +122,13 @@ def HopeWin_MACD_MA(symbolinfo,rawdata_macd,macdParaSet,positionRatio,initialCas
     slip = symbolinfo.getSlip()
     result['ret'] = ((result['closeprice'] - result['openprice']) * result['tradetype']) - slip
     result['ret_r'] = result['ret'] / result['openprice']
-    results = {}
 
     if calcResult:
         result['commission_fee'], result['per earn'], result['own cash'], result['hands'] = RS.calcResult(result,
                                                                                                           symbolinfo,
                                                                                                           initialCash,
                                                                                                           positionRatio)
-
+    '''
         endcash = result['own cash'].iloc[-1]
         Annual = RS.annual_return(result)
         Sharpe = RS.sharpe_ratio(result)
@@ -149,6 +148,8 @@ def HopeWin_MACD_MA(symbolinfo,rawdata_macd,macdParaSet,positionRatio,initialCas
         }
     closeopr = result.loc[:, 'closetime':'tradetype']
     return result, rawdata_macd, closeopr, results
+    '''
+    return result
 
 if __name__=='__main__':
     #====================参数和文件夹设置======================================

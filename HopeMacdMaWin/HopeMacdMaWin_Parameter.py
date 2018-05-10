@@ -64,7 +64,56 @@ dsl_ownl_set=[[-0.020,0.009],[-0.018,0.009]]
 #newmonth='2018-05'#要生成参数的新月份
 month_n = 7 #n+x的n值，即往前推多少个月
 
-
+#=================结果指标开关====================
+ResultIndexDic=[
+    "OprTimes", #操作次数
+    "LongOprTimes",#多操作次数
+    "ShortOprTimes",#空操作次数
+    "EndCash",  # 最终资金
+    "LongOprRate",#多操作占比
+    "ShortOprRate",#空操作占比
+    "Annual",#年化收益
+    "Sharpe",#夏普
+    "SR",#成功率
+    "LongSR",#多操作成功率
+    "ShortSR",#空操作成功率
+    "DrawBack",#资金最大回撤
+    "MaxSingleEarnRate",#单次最大盈利率
+    "MaxSingleLossRate",#单次最大亏损率
+    "ProfitLossRate",#盈亏比
+    "LongProfitLossRate",#多操作盈亏比
+    "ShoartProfitLossRate",#空操作盈亏比
+    "MaxSuccessiveEarn",#最大连续盈利次数
+    "MaxSuccessiveLoss",#最大连续亏损次数
+    "AvgSuccessiveEarn",#平均连续盈利次数
+    "AveSuccessiveLoss" #平均连续亏损次数'
+]
+'''
+#下面这个是指标全量，要加减从里面挑
+ResultIndexDic=[
+    "OprTimes", #操作次数
+    "LongOprTimes",#多操作次数
+    "ShortOprTimes",#空操作次数
+    "EndCash",  # 最终资金
+    "LongOprRate",#多操作占比
+    "ShortOprRate",#空操作占比
+    "Annual",#年化收益
+    "Sharpe",#夏普
+    "SR",#成功率
+    "LongSR",#多操作成功率
+    "ShortSR",#空操作成功率
+    "DrawBack",#资金最大回撤
+    "MaxSingleEarnRate",#单次最大盈利率
+    "MaxSingleLossRate",#单次最大亏损率
+    "ProfitLossRate",#盈亏比
+    "LongProfitLossRate",#多操作盈亏比
+    "ShoartProfitLossRate",#空操作盈亏比
+    "MaxSuccessiveEarn",#最大连续盈利次数
+    "MaxSuccessiveLoss",#最大连续亏损次数
+    "AvgSuccessiveEarn",#平均连续盈利次数
+    "AveSuccessiveLoss" #平均连续亏损次数'
+]
+'''
 #===============多品种多周期优化参数=============================
 #多品种多周期优化开关，打开后代码会从下面标识的文件中导入参数
 symbol_KMIN_opt_swtich=False
