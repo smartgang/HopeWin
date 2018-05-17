@@ -38,7 +38,7 @@ def getdsl_ownlMonthParameter(strategyName,dsl_ownl_list,symbolinfo, K_MIN, para
 
 def getmultiStlMonthParameter(strategyName,stllist,symbolinfo, K_MIN, parasetlist, folderpath, startmonth, endmonth):
     colslist = mtf.getColumnsName(True)
-    resultfilesuffix = 'result_multiSLT.csv'
+    resultfilesuffix = ' result_multiSLT.csv'
     # 先生成参数列表
     allSltSetList = []  # 这是一个二维的参数列表，每一个元素是一个止损目标的参数dic列表
     for slt in sltlist:
