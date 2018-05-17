@@ -32,7 +32,8 @@ def calDailyReturn():
     #filesuffix = 'resultDSL_by_tick.csv'
     #filesuffix = 'resultOWNL_by_tick.csv'
     #filesuffix = 'result_multiSLT.csv'
-
+    indexcols=Parameter.ResultIndexDic
+    resultList=[]
     for i in range(paranum):
         setname = parasetlist.ix[i, 'Setname']
         print setname
@@ -40,6 +41,13 @@ def calDailyReturn():
         dR=RS.dailyReturn(symbolinfo,oprdf,dailyK,Parameter.initialCash)#计算生成每日结果
         dR.calDailyResult()
         dR.dailyClose.to_csv(strategyName + ' ' + symbolinfo.symbol + str(K_MIN) + ' ' + setname + ' daily'+filesuffix)
+
+        results = RS.getStatisticsResult(oprdf, False, indexcols, dR.dailyClose)
+        print results
+        resultList.append([setname] + results)  # 在这里附上setname
+
+    resultdf = pd.DataFrame(resultList,columns=['Setname'] + indexcols)
+    resultdf.to_csv("%s %s %d finalresults.csv" % (strategyName,symbol, K_MIN))
 
 if __name__=='__main__':
     calDailyReturn()
