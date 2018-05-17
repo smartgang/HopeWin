@@ -31,6 +31,7 @@ def getForward(strategyName,symbolinfo,K_MIN,parasetlist,rawdatapath,startdate,e
     starttime = datetime.now()
     print starttime
     # 多进程优化，启动一个对应CPU核心数量的进程池
+
     pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
     l = []
     for whiteWindows in windowsSet:
@@ -40,8 +41,11 @@ def getForward(strategyName,symbolinfo,K_MIN,parasetlist,rawdatapath,startdate,e
     pool.join()
 
     mtf.calGrayResult(strategyName,symbol, K_MIN, windowsSet, forwardrankpath, rawdatapath)
+
     indexcols=Parameter.ResultIndexDic
-    mtf.calOprResult(strategyName,rawdatapath, symbolinfo, K_MIN, nextmonth, columns=colslist, positionRatio=positionRatio,initialCash=initialCash,indexcols=indexcols,indexcolsFlag=indexcolsFlag,resultfilesuffix=resultfilesuffix)
+    rawdata = DC.getBarData(symbol, K_MIN, monthlist[12] + '-01 00:00:00', enddate + ' 23:59:59').reset_index(drop=True)
+    dailyK = DC.generatDailyClose(rawdata) #生成按日的K线
+    mtf.calOprResult(strategyName,rawdatapath, symbolinfo, K_MIN, nextmonth, colslist, dailyK,positionRatio,initialCash,indexcols,indexcolsFlag,resultfilesuffix)
     endtime = datetime.now()
     print starttime
     print endtime

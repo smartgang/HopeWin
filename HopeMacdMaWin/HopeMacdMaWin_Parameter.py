@@ -6,7 +6,7 @@
 strategyName='HopeMacdMaWin'
 exchange_id = 'SHFE'
 sec_id='RB'
-K_MIN = 600
+K_MIN = 3600
 startdate='2016-01-01'
 enddate = '2018-05-01'
 parasetname = 'MACDParameterSet1.csv'
@@ -17,17 +17,17 @@ initialCash = 200000 #起始资金
 progress_close = False
 calcDsl_close=True
 calcOwnl_close=True
-calcFrsl_close=True
-calcMultiSLT_close=False
+calcFrsl_close=False
+calcMultiSLT_close=True
 calcDslOwnl_close=False
 #dsl参数
 dslStep_close=-0.002
-dslTargetStart_close=-0.014
-dslTargetEnd_close = -0.024
+dslTargetStart_close=-0.018
+dslTargetEnd_close = -0.020
 #ownl参数
 ownlStep_close=0.001
 ownlTargetStart_close = 0.008
-ownltargetEnd_close = 0.011
+ownltargetEnd_close = 0.010
 nolossThreshhold_close = 3
 #frsl参数
 frslStep_close= -0.001
@@ -41,17 +41,17 @@ forwardWinEnd=12
 #止损类型开关
 multiSTL_forward=True #多止损混合推进开关（忽略common模式）
 common_forward=False #普通回测结果推进
-calcDsl_forward=False
-calcOwnl_forward=False
-calsFrsl_forward=True
+calcDsl_forward=True
+calcOwnl_forward=True
+calsFrsl_forward=False
 calcDslOwnl_forward=False
 #dsl参数
 dslStep_forward=-0.002
-dslTargetStart_forward=-0.010
-dslTargetEnd_forward = -0.042
+dslTargetStart_forward=-0.018
+dslTargetEnd_forward = -0.020
 #ownl参数
 ownlStep_forward=0.001
-ownlTargetStart_forward = 0.005
+ownlTargetStart_forward = 0.008
 ownltargetEnd_forward = 0.010
 #frsl参数
 frslStep_forward= -0.001

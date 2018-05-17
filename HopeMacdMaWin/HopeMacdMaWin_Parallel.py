@@ -10,10 +10,13 @@ import multiprocessing
 import HopeMacdMaWin_Parameter as Parameter
 import ResultStatistics as RS
 
-def getResult(strategyName,symbolinfo,K_MIN,setname,rawdata,para,positionRatio,initialCash,contractswaplist,indexcols):
+def getResult(strategyName,symbolinfo,K_MIN,setname,rawdata,dailyK,para,positionRatio,initialCash,contractswaplist,indexcols):
     result = Hope_MACD_MA_Win.HopeWin_MACD_MA(symbolinfo,rawdata,para,positionRatio,initialCash,contractswaplist)
     result.to_csv(strategyName+' '+symbolinfo.symbol + str(K_MIN) + ' ' + setname + ' result.csv')
-    results=RS.getStatisticsResult(result,False,indexcols)
+    dR=RS.dailyReturn(symbolinfo,result,dailyK,initialCash)#计算生成每日结果
+    dR.calDailyResult()
+    dR.dailyClose.to_csv((strategyName + ' ' + symbolinfo.symbol + str(K_MIN) + ' ' + setname + ' dailyresult.csv'))
+    results=RS.getStatisticsResult(result,False,indexcols,dR.dailyClose)
     del result
     print results
     return [setname]+results #在这里附上setname
@@ -39,6 +42,7 @@ def getParallelResult(strategyParameter,resultpath,parasetlist,paranum,indexcols
 
     # 取K线数据
     rawdata = DC.getBarData(symbol, K_MIN, startdate + ' 00:00:00', enddate + ' 23:59:59').reset_index(drop=True)
+    dailyK = DC.generatDailyClose(rawdata) #生成按日的K线
     foldername = ' '.join([strategyName, exchange_id, sec_id, str(K_MIN)])
     try:
         os.chdir(resultpath)
@@ -65,7 +69,7 @@ def getParallelResult(strategyParameter,resultpath,parasetlist,paranum,indexcols
             'MA_N':ma_n
         }
         #l.append(getResult(symbolInfo, K_MIN, setname, rawdata, paraset, swaplist))
-        l.append(pool.apply_async(getResult, (strategyName,symbolInfo, K_MIN, setname, rawdata, paraset, positionRatio,initialCash,swaplist,indexcols)))
+        l.append(pool.apply_async(getResult, (strategyName,symbolInfo, K_MIN, setname, rawdata, dailyK,paraset, positionRatio,initialCash,swaplist,indexcols)))
     pool.close()
     pool.join()
 
