@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
 '''
-import Hope_MACD_MA_Win
+from Hope_MACD_MA_Win import HopeWin_MACD_MA
 import pandas as pd
 import numpy as np
 import os
@@ -28,7 +28,7 @@ def getResult(strategyName, symbolinfo, K_MIN, setname, rawdataDic, para, positi
             symbol_domain_start = symbolDomainDic[symbol][0]
         symbol_domain_end = symbolDomainDic[symbol][1]
         rawdata = rawdataDic[symbol]
-        r = Lvyi3MAWin(symbolinfo=symbolinfo, rawdata=rawdata, paraset=para)
+        r = HopeWin_MACD_MA(symbolinfo=symbolinfo, rawdata_macd=rawdata, macdParaSet=para)
         r['symbol'] = symbol  # 增加主力全约列
         r = r.loc[(r['openutc'] >= symbol_domain_start) & (r['openutc'] <= symbol_domain_end)]
         last_domain_utc = None

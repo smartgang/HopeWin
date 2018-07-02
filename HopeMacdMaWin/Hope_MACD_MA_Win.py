@@ -34,15 +34,15 @@ def removeContractSwap(resultlist,contractswaplist):
     results = results.reset_index(drop=True)
     return results
 
-def HopeWin_MACD_MA(symbolinfo,rawdata_macd,macdParaSet,positionRatio,initialCash,contractswaplist,calcResult=True):
+def HopeWin_MACD_MA(symbolinfo,rawdata_macd,macdParaSet):
     setname=macdParaSet['Setname']
     MACD_S=macdParaSet['MACD_S']
     MACD_L = macdParaSet['MACD_L']
     MACD_M = macdParaSet['MACD_M']
     MA_N = macdParaSet['MA_N']
     print setname
-	rawdata['Unnamed: 0'] = range(rawdata.shape[0])
-    beginindex = rawdata.ix[0, 'Unnamed: 0']
+    rawdata_macd['Unnamed: 0'] = range(rawdata_macd.shape[0])
+    beginindex = rawdata_macd.ix[0, 'Unnamed: 0']
     # 计算MACD
     macd = MA.calMACD(rawdata_macd['close'], MACD_S, MACD_L, MACD_M)
     rawdata_macd['DIF'] = macd[0]
