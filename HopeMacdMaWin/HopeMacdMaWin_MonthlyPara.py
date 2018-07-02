@@ -11,18 +11,18 @@ def getDslMonthParameter(strategyName,dslset,symbolinfo, K_MIN, parasetlist, fol
     colslist = mtf.getColumnsName(True)
     resultfilesuffix = ' resultDSL_by_tick.csv'
     for dslTarget in dslset:
-        rawdatapath = folderpath + "DynamicStopLoss" + str(dslTarget * 1000) + '\\'
+        rawdatapath = folderpath + "DynamicStopLoss%.1f\\" % (dslTarget * 1000)
         df = mtf.getMonthParameter(strategyName, startmonth, endmonth, symbolinfo, K_MIN, parasetlist, rawdatapath,colslist, resultfilesuffix)
-        filenamehead = ("%s%s_%s_%d_%s_parameter_dsl_%.3f" % (rawdatapath,strategyName, symbolinfo.symbol, K_MIN, endmonth,dslTarget))
+        filenamehead = ("%s%s_%s_%d_%s_parameter_dsl_%.3f" % (rawdatapath,strategyName, symbolinfo.domain_symbol, K_MIN, endmonth,dslTarget))
         df.to_csv(filenamehead + '.csv')
 
 def getownlMonthParameter(strategyName,ownlset,symbolinfo, K_MIN, parasetlist, folderpath, startmonth, endmonth):
     colslist = mtf.getColumnsName(True)
     resultfilesuffix = ' resultOWNL_by_tick.csv'
     for ownlTarget in ownlset:
-        rawdatapath = folderpath + "OnceWinNoLoss" + str(ownlTarget*1000) + '\\'
+        rawdatapath = folderpath + "OnceWinNoLoss%.1f\\" % (ownlTarget*1000)
         df = mtf.getMonthParameter(strategyName, startmonth, endmonth, symbolinfo, K_MIN, parasetlist, rawdatapath,colslist, resultfilesuffix)
-        filenamehead = ("%s%s_%s_%d_%s_parameter_ownl_%.3f" % (rawdatapath, strategyName,symbolinfo.symbol, K_MIN, endmonth,ownlTarget))
+        filenamehead = ("%s%s_%s_%d_%s_parameter_ownl_%.3f" % (rawdatapath, strategyName,symbolinfo.domain_symbol, K_MIN, endmonth,ownlTarget))
         df.to_csv(filenamehead + '.csv')
 
 
@@ -33,10 +33,10 @@ def getdsl_ownlMonthParameter(strategyName,dsl_ownl_list,symbolinfo, K_MIN, para
         newfolder = ("dsl_%.3f_ownl_%.3f\\" % (dsl_ownl[0], dsl_ownl[1]))
         rawdatapath = folderpath + newfolder  # ！！正常:'\\'，双止损：填上'\\+双止损目标文件夹\\'
         df = mtf.getMonthParameter(strategyName, startmonth, endmonth, symbolinfo, K_MIN, parasetlist, rawdatapath,colslist, resultfilesuffix)
-        filenamehead = ("%s%s_%s_%d_%s_parameter_dsl_%.3f_ownl_%.3f" % (rawdatapath,strategyName,symbolinfo.symbol, K_MIN, endmonth,dsl_ownl[0], dsl_ownl[1]))
+        filenamehead = ("%s%s_%s_%d_%s_parameter_dsl_%.3f_ownl_%.3f" % (rawdatapath,strategyName,symbolinfo.domain_symbol, K_MIN, endmonth,dsl_ownl[0], dsl_ownl[1]))
         df.to_csv(filenamehead + '.csv')
 
-def getmultiStlMonthParameter(strategyName,stllist,symbolinfo, K_MIN, parasetlist, folderpath, startmonth, endmonth):
+def getmultiStlMonthParameter(strategyName,sltlist,symbolinfo, K_MIN, parasetlist, folderpath, startmonth, endmonth):
     colslist = mtf.getColumnsName(True)
     resultfilesuffix = ' result_multiSLT.csv'
     # 先生成参数列表
@@ -64,7 +64,7 @@ def getmultiStlMonthParameter(strategyName,stllist,symbolinfo, K_MIN, parasetlis
             newfolder += (sltp['name'] + '_%.3f' % (sltp['sltValue']))
         rawdatapath = folderpath + newfolder + '\\'
         df = mtf.getMonthParameter(strategyName, startmonth, endmonth, symbolinfo, K_MIN, parasetlist, rawdatapath,colslist, resultfilesuffix)
-        filenamehead = ("%s%s_%s_%d_%s_parameter_%s" % (rawdatapath,strategyName,symbolinfo.symbol, K_MIN, endmonth,newfolder))
+        filenamehead = ("%s%s_%s_%d_%s_parameter_%s" % (rawdatapath,strategyName,symbolinfo.domain_symbol, K_MIN, endmonth,newfolder))
         df.to_csv(filenamehead + '.csv')
 
 if __name__=='__main__':
@@ -125,7 +125,7 @@ if __name__=='__main__':
             colslist = mtf.getColumnsName(False)
             resultfilesuffix = ' result.csv'
             df = mtf.getMonthParameter(strategyName, startmonth, newmonth, symbolinfo, K_MIN, parasetlist, foldername,colslist, resultfilesuffix)
-            filenamehead = ("%s_%s_%d_%s_parameter_common" % (strategyName, symbolinfo.symbol, K_MIN, newmonth))
+            filenamehead = ("%s_%s_%d_%s_parameter_common" % (strategyName, symbolinfo.domain_symbol, K_MIN, newmonth))
             df.to_csv(filenamehead + '.csv')
 
         if dsl:
