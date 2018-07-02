@@ -41,6 +41,8 @@ def HopeWin_MACD_MA(symbolinfo,rawdata_macd,macdParaSet,positionRatio,initialCas
     MACD_M = macdParaSet['MACD_M']
     MA_N = macdParaSet['MA_N']
     print setname
+	rawdata['Unnamed: 0'] = range(rawdata.shape[0])
+    beginindex = rawdata.ix[0, 'Unnamed: 0']
     # 计算MACD
     macd = MA.calMACD(rawdata_macd['close'], MACD_S, MACD_L, MACD_M)
     rawdata_macd['DIF'] = macd[0]
@@ -117,18 +119,22 @@ def HopeWin_MACD_MA(symbolinfo,rawdata_macd,macdParaSet,positionRatio,initialCas
     result = result.reset_index(drop=True)
     result.drop(result.shape[0] - 1, inplace=True)
     # 去掉跨合约的操作
-    result = removeContractSwap(result, contractswaplist)
+    # 使用单合约，不用再去掉跨合约
+    #result = removeContractSwap(result, contractswaplist)
 
     slip = symbolinfo.getSlip()
     result['ret'] = ((result['closeprice'] - result['openprice']) * result['tradetype']) - slip
     result['ret_r'] = result['ret'] / result['openprice']
+    results = {}
 
+    '''
+    # 使用单合约，策略核心内不再计算结果
     if calcResult:
         result['commission_fee'], result['per earn'], result['own cash'], result['hands'] = RS.calcResult(result,
                                                                                                           symbolinfo,
                                                                                                           initialCash,
                                                                                                           positionRatio)
-    '''
+    
         endcash = result['own cash'].iloc[-1]
         Annual = RS.annual_return(result)
         Sharpe = RS.sharpe_ratio(result)
