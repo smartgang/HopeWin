@@ -42,7 +42,7 @@ SAR(17,0.03,0.3);//表示计算17个周期抛物转向，步长为3%，极限值
     2.市道趋势明显时，转向点信号准确，与DMI指标同时使用更好
     3.盘局时，失误率较高
 '''
-import talib
+#import talib
 import pandas as pd
 import numpy as np
 

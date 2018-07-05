@@ -18,7 +18,7 @@ def getResult(strategyName, symbolinfo, K_MIN, setname, rawdataDic, para, positi
     symbolDomainDic = symbolinfo.getSymbolDomainDic()
     result = pd.DataFrame()
     last_domain_utc = None
-    print para['Setname']
+    #print para['Setname']
     for symbol in symbollist:
         if last_domain_utc:
             # 如果上一个合约的最后一次平仓时间超过其主力合约结束时间，则要修改本次合约的开始时间为上一次平仓后

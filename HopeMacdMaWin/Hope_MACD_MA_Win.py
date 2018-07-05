@@ -40,7 +40,7 @@ def HopeWin_MACD_MA(symbolinfo,rawdata_macd,macdParaSet):
     MACD_L = macdParaSet['MACD_L']
     MACD_M = macdParaSet['MACD_M']
     MA_N = macdParaSet['MA_N']
-    print setname
+    #print setname
     rawdata_macd['Unnamed: 0'] = range(rawdata_macd.shape[0])
     beginindex = rawdata_macd.ix[0, 'Unnamed: 0']
     # 计算MACD
@@ -117,7 +117,8 @@ def HopeWin_MACD_MA(symbolinfo,rawdata_macd,macdParaSet):
     result = pd.concat([longopr, shortopr])
     result = result.sort_index()
     result = result.reset_index(drop=True)
-    result.drop(result.shape[0] - 1, inplace=True)
+    #result.drop(result.shape[0] - 1, inplace=True)
+    result = result.dropna()
     # 去掉跨合约的操作
     # 使用单合约，不用再去掉跨合约
     #result = removeContractSwap(result, contractswaplist)
