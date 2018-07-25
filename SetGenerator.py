@@ -19,17 +19,17 @@ def parasetGenerator():
 def parasetGeneratorforMACD_MA():
     setlist=[]
     i=0
-    for ms in range(3,16,1):
-        for ml in range(16,36,2):
-            for mm in range(3,16,2):
-                for ma in range(30,91,10):
+    for ms in range(5,14,1):
+        for ml in range(16,29,2):
+            for mm in range(5,16,2):
+                for ma in range(20,51,10):
                     setname='Set'+str(i)+' MS'+str(ms)+' ML'+str(ml)+' MM'+str(mm)+' MA'+str(ma)
                     l=[setname,ms,ml, mm,ma]
                     setlist.append(l)
                     i+=1
 
     setpd=pd.DataFrame(setlist,columns=['Setname','MACD_Short','MACD_Long','MACD_M','MA_N'])
-    setpd.to_csv('ParameterSet_MACD_MA.csv')
+    setpd.to_csv('ParameterSet_IntradayFry.csv')
 
 def rankwinSetGenerator():
     setlist=[]
