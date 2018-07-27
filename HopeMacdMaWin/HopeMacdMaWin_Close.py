@@ -12,6 +12,7 @@ import numpy as np
 import multiprocessing
 import datetime
 import HopeMacdMaWin_Parameter as Parameter
+import time
 
 def bar1mPrepare(bar1m):
     bar1m['longHigh'] = bar1m['high']
