@@ -108,7 +108,7 @@ def getParallelResult(strategyParameter,resultpath,parasetlist,paranum,indexcols
     pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
     l = []
     resultlist = pd.DataFrame(columns=['Setname']+indexcols)
-    for i in range(1338, paranum):
+    for i in range(0, paranum):
         setname = parasetlist.ix[i, 'Setname']
         macd_s = parasetlist.ix[i, 'MACD_Short']
         macd_l = parasetlist.ix[i, 'MACD_Long']
