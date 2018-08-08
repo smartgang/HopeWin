@@ -11,9 +11,15 @@ import HopeMacdMaWin_Parameter as Parameter
 import ResultStatistics as RS
 import time
 
-def getResult(strategyName, symbolinfo, K_MIN, setname, rawdataDic, para, positionRatio, initialCash, indexcols,timestart):
+def getResult(strategyName, symbolinfo, K_MIN, setname, rawdataDic, para, result_para_dic, indexcols,timestart):
     time1 = time.time()
     print ("%s Enter %.3f" % (setname, time1-timestart))
+
+    initialCash = result_para_dic['initialCash']
+    positionRatio = result_para_dic['positionRatio']
+    remove_polar_switch = result_para_dic['remove_polar_switch']
+    remove_polaar_rate = result_para_dic['remove_polaar_rate']
+
     symbollist = symbolinfo.getSymbolList()
     symbolDomainDic = symbolinfo.getSymbolDomainDic()
     result = pd.DataFrame()
@@ -40,6 +46,11 @@ def getResult(strategyName, symbolinfo, K_MIN, setname, rawdataDic, para, positi
                 last_domain_utc = last_close_utc
             result = pd.concat([result, r])
     result.reset_index(drop=True, inplace=True)
+
+    # 去极值操作
+    if remove_polar_switch:
+        result = RS.opr_result_remove_polar(result, remove_polaar_rate)
+
     # 全部操作结束后，要根据修改完的主力时间重新接出一份主连来计算dailyK
     domain_bar = pd.DataFrame()
     for symbol in symbollist:
@@ -72,8 +83,7 @@ def getParallelResult(strategyParameter,resultpath,parasetlist,paranum,indexcols
     startdate = strategyParameter['startdate']
     enddate = strategyParameter['enddate']
     domain_symbol = '.'.join([exchange_id, sec_id])
-    positionRatio = strategyParameter['positionRatio']
-    initialCash = strategyParameter['initialCash']
+    result_para_dic = strategyParameter['result_para_dic']
     # ======================数据准备==============================================
     # 取合约信息
     symbolInfo = DC.SymbolInfo(domain_symbol, startdate, enddate)
@@ -98,7 +108,7 @@ def getParallelResult(strategyParameter,resultpath,parasetlist,paranum,indexcols
     pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
     l = []
     resultlist = pd.DataFrame(columns=['Setname']+indexcols)
-    for i in range(0, paranum):
+    for i in range(1338, paranum):
         setname = parasetlist.ix[i, 'Setname']
         macd_s = parasetlist.ix[i, 'MACD_Short']
         macd_l = parasetlist.ix[i, 'MACD_Long']
@@ -111,8 +121,8 @@ def getParallelResult(strategyParameter,resultpath,parasetlist,paranum,indexcols
             'MACD_M': macd_m,
             'MA_N':ma_n
         }
-        #l.append(getResult(strategyName, symbolInfo, K_MIN, setname, rawdataDic, paraset, positionRatio, initialCash, indexcols))
-        l.append(pool.apply_async(getResult, (strategyName, symbolInfo, K_MIN, setname, rawdataDic, paraset, positionRatio, initialCash, indexcols,timestart)))
+        l.append(getResult(strategyName, symbolInfo, K_MIN, setname, rawdataDic, paraset, result_para_dic, indexcols,timestart))
+        #l.append(pool.apply_async(getResult, (strategyName, symbolInfo, K_MIN, setname, rawdataDic, paraset, positionRatio, initialCash, indexcols,timestart)))
     pool.close()
     pool.join()
     timeend = time.time()
@@ -153,8 +163,7 @@ if __name__=='__main__':
         'K_MIN': Parameter.K_MIN,
         'startdate': Parameter.startdate,
         'enddate' : Parameter.enddate,
-        'positionRatio':Parameter.positionRatio,
-        'initialCash': Parameter.initialCash
+        'result_para_dic': Parameter.result_para_dic
         }
         strategyParameterSet.append(paradic)
     else:
@@ -171,8 +180,7 @@ if __name__=='__main__':
                 'K_MIN': symbolset.ix[i,'K_MIN'],
                 'startdate': symbolset.ix[i,'startdate'],
                 'enddate': symbolset.ix[i,'enddate'],
-                'positionRatio' : Parameter.positionRatio,
-                'initialCash' : Parameter.initialCash
+                'result_para_dic': Parameter.result_para_dic
             }
             )
     allsymbolresult_cols=['Setname']+indexcols+[ 'strategyName','exchange_id','sec_id','K_MIN']

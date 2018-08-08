@@ -44,7 +44,8 @@ def HopeWin_MACD_MA(symbolinfo,rawdata_macd,macdParaSet):
     rawdata_macd['Unnamed: 0'] = range(rawdata_macd.shape[0])
     beginindex = rawdata_macd.ix[0, 'Unnamed: 0']
     # 计算MACD
-    macd = MA.calMACD(rawdata_macd['close'], MACD_S, MACD_L, MACD_M)
+    #macd = MA.calMACD(rawdata_macd['close'], MACD_S, MACD_L, MACD_M)   # 普通MACD
+    macd = MA.hull_macd(rawdata_macd['close'], MACD_S, MACD_L, MACD_M)  # hull_macd
     rawdata_macd['DIF'] = macd[0]
     rawdata_macd['DEA'] = macd[1]
     rawdata_macd['MA'] = MA.calEMA(rawdata_macd['close'],MA_N)

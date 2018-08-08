@@ -15,10 +15,11 @@ def calDailyReturn():
     enddate = '2018-04-30'
     symbol = 'SHFE.RB'
     K_MIN = 3600
-    symbolinfo = DC.SymbolInfo(symbol)
+    symbolinfo = DC.SymbolInfo(symbol, startdate, enddate)
     strategyName = Parameter.strategyName
-    rawdata = DC.getBarData(symbol, K_MIN, startdate + ' 00:00:00', enddate + ' 23:59:59').reset_index(drop=True)
-    dailyK = DC.generatDailyClose(rawdata) #生成按日的K线
+    #rawdata = DC.getBarData(symbol, K_MIN, startdate + ' 00:00:00', enddate + ' 23:59:59').reset_index(drop=True)
+    #dailyK = DC.generatDailyClose(rawdata)
+    bardic = DC.getBarBySymbolList(symbol, symbolinfo.getSymbolList(), K_MIN, startdate, enddate)
 
     upperpath=DC.getUpperPath(Parameter.folderLevel)
     resultpath = upperpath + Parameter.resultFolderName
@@ -40,10 +41,14 @@ def calDailyReturn():
     for i in range(paranum):
         setname = parasetlist.ix[i, 'Setname']
         print setname
-        oprdf=pd.read_csv(strategyName + ' ' + symbolinfo.symbol + str(K_MIN) + ' ' + setname + ' '+filesuffix)
-        dR=RS.dailyReturn(symbolinfo,oprdf,dailyK,Parameter.initialCash)#计算生成每日结果
+        oprdf=pd.read_csv(strategyName + ' ' + symbolinfo.domain_symbol + str(K_MIN) + ' ' + setname + ' '+filesuffix)
+        symbolDomainDic = symbolinfo.amendSymbolDomainDicByOpr(oprdf)
+        bars = DC.getDomainbarByDomainSymbol(symbolinfo.getSymbolList(), bardic, symbolDomainDic)
+        dailyK = DC.generatDailyClose(bars)
+
+        dR=RS.dailyReturn(symbolinfo,oprdf,dailyK,Parameter.initialCash)
         dR.calDailyResult()
-        dR.dailyClose.to_csv(strategyName + ' ' + symbolinfo.symbol + str(K_MIN) + ' ' + setname + ' daily'+filesuffix)
+        dR.dailyClose.to_csv(strategyName + ' ' + symbolinfo.domain_symbol + str(K_MIN) + ' ' + setname + ' daily'+filesuffix)
 
         results = RS.getStatisticsResult(oprdf, False, indexcols, dR.dailyClose)
         print results
@@ -61,25 +66,25 @@ def calResultByPeriod():
     :return:
     '''
     #设定开始和结束时间
-    startdate = '2010-01-01'
-    enddate = '2018-04-28'
+    startdate = '2011-04-01'
+    enddate = '2018-07-01'
 
     #2.选择时间周期
-    freq='YS' #按年统计
+    #freq='YS' #按年统计
     #freq='2QS' #按半年统计
     #freq='QS' #按季度统计
-    #freq='MS' #按月统计，如需多个月，可以加上数据，比如2个月：2MS
+    freq='MS' #按月统计，如需多个月，可以加上数据，比如2个月：2MS
 
     #3.设文件和文件夹状态
-    filedir='D:\\002 MakeLive\myquant\HopeWin\Results\HopeMacdMaWin SHFE RB 3600' #文件所在文件夹
-    oprfilename = 'HopeMacdMaWin SHFE.RB3600 Set26 MS4 ML21 MM5 result.csv' #买卖操作文件名
-    dailyResultFileName = 'HopeMacdMaWin SHFE.RB3600 Set26 MS4 ML21 MM5 dailyresult.csv' #日结果文件名
-    newFileName = 'HopeMacdMaWin SHFE.RB3600 Set26 MS4 ML21 MM5 result_by_Period_Y.csv' #要生成的新文件名
+    filedir='D:\\002 MakeLive\myquant\HopeWin\Results\HopeMacdMaWin DCE J 3600\dsl_-0.022ownl_0.012\ForwardOprAnalyze\\' #文件所在文件夹
+    oprfilename = 'HopeMacdMaWin DCE.J3600_Rank3_win9_oprResult.csv' #买卖操作文件名
+    dailyResultFileName = 'HopeMacdMaWin DCE.J3600_Rank3_win9_oprdailyResult.csv' #日结果文件名
+    newFileName = 'HopeMacdMaWin DCE.J3600_Rank3_win9_result_by_Period_M.csv' #要生成的新文件名
     os.chdir(filedir)
     oprdf = pd.read_csv(oprfilename)
     dailyResultdf = pd.read_csv(dailyResultFileName)
 
-    oprdfcols = oprdf.index.tolist()
+    oprdfcols = oprdf.columns.tolist()
     if 'new_closeprice' in oprdfcols:
         newFlag = True
     else:
@@ -110,8 +115,104 @@ def calResultByPeriod():
     rdf = pd.DataFrame(rlist,columns=['StartTime','EndTime']+Parameter.ResultIndexDic)
     rdf.to_csv(newFileName)
 
+def remove_polar():
+    symbol = 'DCE.J'
+    symbolinfo = DC.SymbolInfo(symbol)
+    folder = 'D:\\002 MakeLive\myquant\HopeWin\Results\HopeMacdMaWin DCE J 3600\ForwardOprAnalyze\\'
+    filename = 'HopeMacdMaWin DCE.J3600_Rank3_win9_oprResult.csv'
+    opr = pd.read_csv(folder+filename)
+    opr = RS.opr_result_remove_polar(opr)
+    opr['commission_fee_rp'], opr['per earn_rp'], opr['own cash_rp'], opr['hands_rp'] = RS.calcResult(result=opr, symbolinfo=symbolinfo, initialCash=200000, positionRatio=1, ret_col='new_ret')
+    opr.to_csv(folder+'HopeMacdMaWin DCE.J3600_Rank3_win9_oprResult_remove_polar.csv')
 
+def multi_slt_remove_polar():
+    """
+        计算多个止损策略结合回测的结果
+        :param strategyName:
+        :param symbolInfo:
+        :param K_MIN:
+        :param parasetlist:
+        :param sltlist:
+        :param positionRatio:
+        :param initialCash:
+        :return:
+    """
+    symbol = 'DCE.J'
+    symbolInfo = DC.SymbolInfo(symbol)
+    symbol = symbolInfo.domain_symbol
+    new_indexcols = []
+    indexcols = Parameter.ResultIndexDic
+    for i in indexcols:
+        new_indexcols.append('new_' + i)
+    allresultdf_cols = ['setname', 'slt', 'slWorkNum'] + indexcols + new_indexcols
+    allresultdf = pd.DataFrame(columns=allresultdf_cols)
+
+    allnum = 0
+    paranum = parasetlist.shape[0]
+
+    # dailyK = DC.generatDailyClose(barxm)
+
+    # 先生成参数列表
+    allSltSetList = []  # 这是一个二维的参数列表，每一个元素是一个止损目标的参数dic列表
+    for slt in sltlist:
+        sltset = []
+        for t in slt['paralist']:
+            sltset.append({'name': slt['name'],
+                           'sltValue': t,
+                           'folder': ("%s%.1f\\" % (slt['folderPrefix'], (t * 1000))),
+                           'fileSuffix': slt['fileSuffix']
+                           })
+        allSltSetList.append(sltset)
+    finalSltSetList = []  # 二维数据，每个一元素是一个多个止损目标的参数dic组合
+    for sltpara in allSltSetList[0]:
+        finalSltSetList.append([sltpara])
+    for i in range(1, len(allSltSetList)):
+        tempset = allSltSetList[i]
+        newset = []
+        for o in finalSltSetList:
+            for t in tempset:
+                newset.append(o + [t])
+        finalSltSetList = newset
+    print finalSltSetList
+
+    for sltset in finalSltSetList:
+        newfolder = ''
+        for sltp in sltset:
+            newfolder += (sltp['name'] + '_%.3f' % (sltp['sltValue']))
+        try:
+            os.mkdir(newfolder)  # 创建文件夹
+        except:
+            pass
+        print (newfolder)
+        pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
+        l = []
+        for sn in range(0, paranum):
+            setname = parasetlist.ix[sn, 'Setname']
+            # l.append(msl.multiStopLosslCal(strategyName, symbolInfo, K_MIN, setname, sltset, positionRatio, initialCash,
+            #                           newfolder + '\\'))
+            l.append(pool.apply_async(msl.multiStopLosslCal,
+                                      (strategyName, symbolInfo, K_MIN, setname, sltset, barxmdic, positionRatio, initialCash, newfolder, indexcols)))
+        pool.close()
+        pool.join()
+
+        resultdf = pd.DataFrame(columns=allresultdf_cols)
+        i = 0
+        for res in l:
+            resultdf.loc[i] = res.get()
+            allresultdf.loc[allnum] = resultdf.loc[i]
+            i += 1
+            allnum += 1
+        resultfilename = ("%s %s%d finalresult_multiSLT_%s.csv" % (strategyName, symbol, K_MIN, newfolder))
+        resultdf.to_csv(newfolder + '\\' + resultfilename, index=False)
+
+    allresultname = ''
+    for slt in sltlist:
+        allresultname += slt['name']
+    # allresultdf['cashDelta'] = allresultdf['new_endcash'] - allresultdf['old_endcash']
+    allresultdf.to_csv("%s %s%d finalresult_multiSLT_%s.csv" % (strategyName, symbol, K_MIN, allresultname), index=False)
+    pass
 
 if __name__=='__main__':
     #calDailyReturn()
     calResultByPeriod() #按时间分段统计结果
+    #remove_polar()

@@ -12,6 +12,7 @@ import numpy as np
 import multiprocessing
 import datetime
 import HopeMacdMaWin_Parameter as Parameter
+import time
 
 def bar1mPrepare(bar1m):
     bar1m['longHigh'] = bar1m['high']
@@ -42,7 +43,7 @@ def bar1mPrepare(bar1m):
     """
     return bar1m
 
-def getDSL(strategyName, symbolInfo, K_MIN, stoplossList, parasetlist, bar1mdic, barxmdic, positionRatio, initialCash, indexcols, progress=False):
+def getDSL(strategyName, symbolInfo, K_MIN, stoplossList, parasetlist, bar1mdic, barxmdic, result_para_dic, indexcols, progress=False):
     symbol = symbolInfo.domain_symbol
     new_indexcols = []
     for i in indexcols:
@@ -74,14 +75,14 @@ def getDSL(strategyName, symbolInfo, K_MIN, stoplossList, parasetlist, bar1mdic,
                 if not progress:
                     # l.append(dsl.dslCal(strategyName,symbolInfo, K_MIN, setname, oprdflist[a-a0], bar1mlist[a-a0], barxmlist[a-a0], positionRatio, initialCash, stoplossTarget, dslFolderName + '\\',
                     #                                       indexcols))
-                    l.append(pool.apply_async(dsl.dslCal, (strategyName, symbolInfo, K_MIN, setname, bar1mdic, barxmdic, positionRatio, initialCash, stoplossTarget,
+                    l.append(pool.apply_async(dsl.dslCal, (strategyName, symbolInfo, K_MIN, setname, bar1mdic, barxmdic, result_para_dic, stoplossTarget,
                                                            dslFolderName + '\\', indexcols)))
                 else:
                     #l.append(dsl.progressDslCal(strategyName,symbolInfo, K_MIN, setname, bar1m, barxm, pricetick,
                     #                                               positionRatio, initialCash, stoplossTarget,
                     #                                               dslFolderName + '\\'))
                     l.append(pool.apply_async(dsl.progressDslCal, (strategyName,
-                                                                   symbolInfo, K_MIN, setname, bar1mdic, barxmdic, positionRatio, initialCash, stoplossTarget,
+                                                                   symbolInfo, K_MIN, setname, bar1mdic, barxmdic, result_para_dic, stoplossTarget,
                                                                    dslFolderName + '\\',indexcols)))
             pool.close()
             pool.join()
@@ -98,7 +99,7 @@ def getDSL(strategyName, symbolInfo, K_MIN, stoplossList, parasetlist, bar1mdic,
     allresultdf.to_csv(strategyName + ' ' + symbol + str(K_MIN) + ' finalresult_dsl.csv', index=False)
 
 
-def getOwnl(strategyName, symbolInfo, K_MIN, winSwitchList, nolossThreshhold, parasetlist, bar1mdic, barxmdic, positionRatio, initialCash, indexcols, progress=False):
+def getOwnl(strategyName, symbolInfo, K_MIN, winSwitchList, nolossThreshhold, parasetlist, bar1mdic, barxmdic, result_para_dic, indexcols, progress=False):
     symbol = symbolInfo.domain_symbol
     new_indexcols = []
     for i in indexcols:
@@ -129,14 +130,14 @@ def getOwnl(strategyName, symbolInfo, K_MIN, winSwitchList, nolossThreshhold, pa
                 setname = parasetlist.ix[a, 'Setname']
                 if not progress:
                     l.append(pool.apply_async(ownl.ownlCal,
-                                              (strategyName, symbolInfo, K_MIN, setname, bar1mdic, barxmdic, winSwitch, nolossThreshhold, positionRatio, initialCash,
+                                              (strategyName, symbolInfo, K_MIN, setname, bar1mdic, barxmdic, winSwitch, nolossThreshhold, result_para_dic,
                                                ownlFolderName + '\\', indexcols)))
                 else:
                     #l.append(ownl.progressOwnlCal(strategyName, symbolInfo, K_MIN, setname, bar1m, barxm, winSwitch,
                     #                           nolossThreshhold, positionRatio, initialCash,
                     #                           ownlFolderName + '\\'))
                     l.append(pool.apply_async(ownl.progressOwnlCal,
-                                              (strategyName, symbolInfo, K_MIN, setname, bar1mdic, barxmdic, winSwitch, nolossThreshhold, positionRatio, initialCash,
+                                              (strategyName, symbolInfo, K_MIN, setname, bar1mdic, barxmdic, winSwitch, nolossThreshhold, result_para_dic,
                                                ownlFolderName + '\\', indexcols)))
             pool.close()
             pool.join()
@@ -155,7 +156,7 @@ def getOwnl(strategyName, symbolInfo, K_MIN, winSwitchList, nolossThreshhold, pa
     ownlallresultdf.to_csv(strategyName + ' ' + symbol + str(K_MIN) + ' finalresult_ownl.csv', index=False)
 
 
-def getFRSL(strategyName, symbolInfo, K_MIN, fixRateList, parasetlist, bar1mdic, barxmdic, positionRatio, initialCash, indexcols, progress=False):
+def getFRSL(strategyName, symbolInfo, K_MIN, fixRateList, parasetlist, bar1mdic, barxmdic, result_para_dic, indexcols, progress=False):
     symbol = symbolInfo.domain_symbol
     new_indexcols = []
     for i in indexcols:
@@ -186,11 +187,11 @@ def getFRSL(strategyName, symbolInfo, K_MIN, fixRateList, parasetlist, bar1mdic,
                     #l.append(frsl.frslCal(strategyName,
                     #                                       symbolInfo, K_MIN, setname, bar1m, barxm, fixRateTarget, positionRatio,initialCash, folderName + '\\'))
                     l.append(pool.apply_async(frsl.frslCal, (strategyName,
-                                                             symbolInfo, K_MIN, setname, bar1mdic, barxmdic, fixRateTarget, positionRatio, initialCash, folderName + '\\',
+                                                             symbolInfo, K_MIN, setname, bar1mdic, barxmdic, fixRateTarget, result_para_dic, folderName + '\\',
                                                              indexcols)))
                 else:
                     l.append(pool.apply_async(frsl.progressFrslCal, (strategyName,
-                                                                     symbolInfo, K_MIN, setname, bar1mdic, barxmdic, fixRateTarget, positionRatio, initialCash, folderName + '\\',
+                                                                     symbolInfo, K_MIN, setname, bar1mdic, barxmdic, fixRateTarget, result_para_dic, folderName + '\\',
                                                                      indexcols)))
             pool.close()
             pool.join()
@@ -209,7 +210,7 @@ def getFRSL(strategyName, symbolInfo, K_MIN, fixRateList, parasetlist, bar1mdic,
     allresultdf.to_csv(strategyName + ' ' + symbol + str(K_MIN) + ' finalresult_frsl.csv', index=False)
 
 
-def getDslOwnl(strategyName, symbolInfo, K_MIN, parasetlist, stoplossList, winSwitchList, positionRatio, initialCash, indexcols):
+def getDslOwnl(strategyName, symbolInfo, K_MIN, parasetlist, stoplossList, winSwitchList, result_para_dic, indexcols):
     symbol = symbolInfo.domain_symbol
     allresultdf = pd.DataFrame(
         columns=['setname', 'dslTarget', 'ownlWinSwtich', 'old_endcash', 'old_Annual', 'old_Sharpe', 'old_Drawback',
@@ -233,7 +234,7 @@ def getDslOwnl(strategyName, symbolInfo, K_MIN, parasetlist, stoplossList, winSw
             for sn in range(0, paranum):
                 setname = parasetlist.ix[sn, 'Setname']
                 l.append(pool.apply_async(dslownl.dslAndownlCal,
-                                                  (strategyName,symbolInfo, K_MIN,setname, stoplossTarget, winSwitch, positionRatio,initialCash,dslFolderName,
+                                                  (strategyName,symbolInfo, K_MIN,setname, stoplossTarget, winSwitch, result_para_dic,dslFolderName,
                                                    ownlFolderName, newfolder + '\\')))
             pool.close()
             pool.join()
@@ -256,7 +257,7 @@ def getDslOwnl(strategyName, symbolInfo, K_MIN, parasetlist, stoplossList, winSw
     allresultdf.to_csv(strategyName+' '+symbol + str(K_MIN)+ ' finalresult_dsl_ownl.csv')
 
 
-def getMultiSLT(strategyName, symbolInfo, K_MIN, parasetlist, barxmdic, sltlist, positionRatio, initialCash, indexcols):
+def getMultiSLT(strategyName, symbolInfo, K_MIN, parasetlist, barxmdic, sltlist, result_para_dic, indexcols):
     """
     计算多个止损策略结合回测的结果
     :param strategyName:
@@ -319,7 +320,7 @@ def getMultiSLT(strategyName, symbolInfo, K_MIN, parasetlist, barxmdic, sltlist,
             #l.append(msl.multiStopLosslCal(strategyName, symbolInfo, K_MIN, setname, sltset, positionRatio, initialCash,
             #                           newfolder + '\\'))
             l.append(pool.apply_async(msl.multiStopLosslCal,
-                                      (strategyName, symbolInfo, K_MIN, setname, sltset, barxmdic, positionRatio, initialCash, newfolder, indexcols)))
+                                      (strategyName, symbolInfo, K_MIN, setname, sltset, barxmdic, result_para_dic, newfolder, indexcols)))
         pool.close()
         pool.join()
 
@@ -363,8 +364,7 @@ if __name__=='__main__':
             'K_MIN': Parameter.K_MIN,
             'startdate': Parameter.startdate,
             'enddate': Parameter.enddate,
-            'positionRatio':Parameter.positionRatio,
-            'initialCash' : Parameter.initialCash,
+            'result_para_dic': Parameter.result_para_dic,
             'progress':Parameter.progress_close,
             'calcDsl': Parameter.calcDsl_close,
             'calcOwnl': Parameter.calcOwnl_close,
@@ -397,8 +397,7 @@ if __name__=='__main__':
                 'K_MIN': symbolset.ix[i, 'K_MIN'],
                 'startdate': symbolset.ix[i, 'startdate'],
                 'enddate': symbolset.ix[i, 'enddate'],
-                'positionRatio' : Parameter.positionRatio,
-                'initialCash' : Parameter.initialCash,
+                'result_para_dic': Parameter.result_para_dic,
                 'progress':symbolset.ix[i,'progress'],
                 'calcDsl': symbolset.ix[i, 'calcDsl'],
                 'calcOwnl': symbolset.ix[i, 'calcOwnl'],
@@ -428,8 +427,7 @@ if __name__=='__main__':
         enddate = strategyParameter['enddate']
         domain_symbol = '.'.join([exchange_id, sec_id])
 
-        positionRatio = strategyParameter['positionRatio']
-        initialCash = strategyParameter['initialCash']
+        result_para_dic = strategyParameter['result_para_dic']
 
         symbolinfo = DC.SymbolInfo(domain_symbol, startdate, enddate)
         pricetick = symbolinfo.getPriceTick()
@@ -486,16 +484,16 @@ if __name__=='__main__':
                                 'paralist': fixRateList,
                                 'folderPrefix': 'FixRateStopLoss',
                                 'fileSuffix': 'resultFRSL_by_tick.csv'})
-            getMultiSLT(strategyName, symbolinfo, K_MIN, parasetlist, barxmdic, sltlist, positionRatio, initialCash, indexcols)
+            getMultiSLT(strategyName, symbolinfo, K_MIN, parasetlist, barxmdic, sltlist, result_para_dic, indexcols)
         else:
             if calcDsl:
-                getDSL(strategyName, symbolinfo, K_MIN, stoplossList, parasetlist, bar1mdic, barxmdic, positionRatio, initialCash, indexcols, progress)
+                getDSL(strategyName, symbolinfo, K_MIN, stoplossList, parasetlist, bar1mdic, barxmdic, result_para_dic, indexcols, progress)
 
             if calcOwnl:
-                getOwnl(strategyName, symbolinfo, K_MIN, winSwitchList, nolossThreshhold, parasetlist, bar1mdic, barxmdic, positionRatio, initialCash, indexcols, progress)
+                getOwnl(strategyName, symbolinfo, K_MIN, winSwitchList, nolossThreshhold, parasetlist, bar1mdic, barxmdic, result_para_dic, indexcols, progress)
 
             if calcFrsl:
-                getFRSL(strategyName, symbolinfo, K_MIN, fixRateList, parasetlist, bar1mdic, barxmdic, positionRatio, initialCash, indexcols, progress)
+                getFRSL(strategyName, symbolinfo, K_MIN, fixRateList, parasetlist, bar1mdic, barxmdic, result_para_dic, indexcols, progress)
 
             if calcDslOwnl:
-                getDslOwnl(strategyName, symbolinfo, K_MIN, parasetlist, stoplossList, winSwitchList, positionRatio, initialCash, indexcols)
+                getDslOwnl(strategyName, symbolinfo, K_MIN, parasetlist, stoplossList, winSwitchList, result_para_dic, indexcols)

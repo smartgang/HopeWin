@@ -7,11 +7,15 @@ strategyName='HopeMacdMaWin'
 exchange_id = 'SHFE'
 sec_id='RB'
 K_MIN = 3600
-startdate='2016-01-01'
-enddate = '2018-05-01'
-parasetname = 'MACDParameterSet1.csv'
-positionRatio = 1 #持仓比例
-initialCash = 200000 #起始资金
+startdate='2010-01-01'
+enddate = '2018-07-01'
+parasetname = 'ParameterSet_MACD_MA.csv'
+result_para_dic = {     # 结果计算相关参数
+    'positionRatio': 1, #持仓比例
+    'initialCash': 200000, #起始资金
+    'remove_polar_switch': False,
+    'remove_polaar_rate': 0.01
+}
 
 #=============止损控制开关===================
 progress_close = False
