@@ -40,14 +40,15 @@ def getForward(strategyName, symbolinfo, K_MIN, parasetlist, rawdatapath, startd
     pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
     l = []
     for whiteWindows in windowsSet:
-        #l.append(mtf.runPara(strategyName,whiteWindows, symbolinfo, K_MIN, parasetlist, monthlist, rawdatapath, forwordresultpath, forwardrankpath, colslist, resultfilesuffix))
-        l.append(pool.apply_async(mtf.runPara, (strategyName,whiteWindows, symbolinfo, K_MIN, parasetlist, monthlist, rawdatapath, forwordresultpath, forwardrankpath, colslist, resultfilesuffix)))
+        # l.append(mtf.runPara(strategyName,whiteWindows, symbolinfo, K_MIN, parasetlist, monthlist, rawdatapath, forwordresultpath, forwardrankpath, colslist, resultfilesuffix))
+        l.append(pool.apply_async(mtf.runPara, (
+        strategyName, whiteWindows, symbolinfo, K_MIN, parasetlist, monthlist, rawdatapath, forwordresultpath, forwardrankpath, colslist, resultfilesuffix)))
     pool.close()
     pool.join()
     mtf.calGrayResult(strategyName, symbol, K_MIN, windowsSet, forwardrankpath, rawdatapath)
     indexcols = Parameter.ResultIndexDic
 
-    #rawdata = DC.getBarData(symbol, K_MIN, monthlist[12] + '-01 00:00:00', enddate + ' 23:59:59').reset_index(drop=True)
+    # rawdata = DC.getBarData(symbol, K_MIN, monthlist[12] + '-01 00:00:00', enddate + ' 23:59:59').reset_index(drop=True)
     cols = ['open', 'high', 'low', 'close', 'strtime', 'utc_time', 'utc_endtime']
     barxmdic = DC.getBarDic(symbolinfo, K_MIN, cols)
 
@@ -57,33 +58,35 @@ def getForward(strategyName, symbolinfo, K_MIN, parasetlist, rawdatapath, startd
     print endtime
 
 
-def getDslForward(strategyName,dslset,symbolinfo, K_MIN, parasetlist, folderpath, startdate, enddate, nextmonth, windowsSet,result_para_dic):
+def getDslForward(strategyName, dslset, symbolinfo, K_MIN, parasetlist, folderpath, startdate, enddate, nextmonth, windowsSet, result_para_dic):
     print ('DSL forward start!')
     colslist = mtf.getColumnsName(True)
     resultfilesuffix = 'resultDSL_by_tick.csv'
-    indexcolsFlag=True
+    indexcolsFlag = True
     for dslTarget in dslset:
         rawdatapath = folderpath + "DynamicStopLoss%.1f\\" % (dslTarget * 1000)
         getForward(strategyName, symbolinfo, K_MIN, parasetlist, rawdatapath, startdate, enddate, nextmonth, windowsSet, colslist, result_para_dic, indexcolsFlag,
                    resultfilesuffix)
     print ('DSL forward finished!')
 
-def getownlForward(strategyName,ownlset,symbolinfo, K_MIN, parasetlist, folderpath, startdate, enddate, nextmonth, windowsSet,result_para_dic):
+
+def getownlForward(strategyName, ownlset, symbolinfo, K_MIN, parasetlist, folderpath, startdate, enddate, nextmonth, windowsSet, result_para_dic):
     print ('OWNL forward start!')
     colslist = mtf.getColumnsName(True)
     resultfilesuffix = 'resultOWNL_by_tick.csv'
-    indexcolsFlag=True
+    indexcolsFlag = True
     for ownlTarget in ownlset:
         rawdatapath = folderpath + "OnceWinNoLoss%.1f\\" % (ownlTarget * 1000)
         getForward(strategyName, symbolinfo, K_MIN, parasetlist, rawdatapath, startdate, enddate, nextmonth, windowsSet, colslist, result_para_dic, indexcolsFlag,
                    resultfilesuffix)
     print ('OWNL forward finished!')
 
-def getdsl_ownlForward(strategyName,dsl_ownl_list,symbolinfo, K_MIN, parasetlist, folderpath, startdate, enddate, nextmonth, windowsSet,result_para_dic):
+
+def getdsl_ownlForward(strategyName, dsl_ownl_list, symbolinfo, K_MIN, parasetlist, folderpath, startdate, enddate, nextmonth, windowsSet, result_para_dic):
     print ('DSL_OWNL forward start!')
     colslist = mtf.getColumnsName(True)
     resultfilesuffix = 'result_dsl_ownl.csv'
-    indexcolsFlag=True
+    indexcolsFlag = True
     for dsl_ownl in dsl_ownl_list:
         newfolder = ("dsl_%.3f_ownl_%.3f\\" % (dsl_ownl[0], dsl_ownl[1]))
         rawdatapath = folderpath + newfolder  # ！！正常:'\\'，双止损：填上'\\+双止损目标文件夹\\'
@@ -91,14 +94,15 @@ def getdsl_ownlForward(strategyName,dsl_ownl_list,symbolinfo, K_MIN, parasetlist
                    resultfilesuffix)
     print ('DSL_OWNL forward finished!')
 
-def getMultiSltForward(strategyName,sltlist,symbolinfo, K_MIN, parasetlist, folderpath, startdate, enddate, nextmonth, windowsSet,result_para_dic):
+
+def getMultiSltForward(strategyName, sltlist, symbolinfo, K_MIN, parasetlist, folderpath, startdate, enddate, nextmonth, windowsSet, result_para_dic):
     '''
     混合止损推进
     '''
     print ('multiSLT forward start!')
     colslist = mtf.getColumnsName(True)
     resultfilesuffix = 'result_multiSLT.csv'
-    indexcolsFlag=True
+    indexcolsFlag = True
     # 先生成参数列表
     allSltSetList = []  # 这是一个二维的参数列表，每一个元素是一个止损目标的参数dic列表
     for slt in sltlist:
@@ -122,12 +126,13 @@ def getMultiSltForward(strategyName,sltlist,symbolinfo, K_MIN, parasetlist, fold
         newfolder = ''
         for sltp in sltset:
             newfolder += (sltp['name'] + '_%.3f' % (sltp['sltValue']))
-        rawdatapath = folderpath + newfolder+'\\'
-        print ("multiSTL Target:%s" %newfolder)
-        getForward(strategyName,symbolinfo, K_MIN, parasetlist, rawdatapath, startdate, enddate, nextmonth, windowsSet, colslist, result_para_dic,indexcolsFlag,resultfilesuffix)
+        rawdatapath = folderpath + newfolder + '\\'
+        print ("multiSTL Target:%s" % newfolder)
+        getForward(strategyName, symbolinfo, K_MIN, parasetlist, rawdatapath, startdate, enddate, nextmonth, windowsSet, colslist, result_para_dic, indexcolsFlag, resultfilesuffix)
     print ('multiSTL forward finished!')
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
     # 文件路径
     upperpath = DC.getUpperPath(Parameter.folderLevel)
     resultpath = upperpath + Parameter.resultFolderName
@@ -148,28 +153,28 @@ if __name__=='__main__':
             'startdate': Parameter.startdate,
             'enddate': Parameter.enddate,
             'result_para_dic': Parameter.result_para_dic,
-            #'nextmonth':Parameter.nextMonthName,
+            # 'nextmonth':Parameter.nextMonthName,
             'commonForward': Parameter.common_forward,
             'calcDsl': Parameter.calcDsl_forward,
             'calcOwnl': Parameter.calcOwnl_forward,
             'calcFrsl': Parameter.calcFrsl_close,
             'calcDslOwnl': Parameter.calcDslOwnl_forward,
-            'dslStep':Parameter.dslStep_forward,
-            'dslTargetStart':Parameter.dslTargetStart_forward,
-            'dslTargetEnd':Parameter.dslTargetEnd_forward,
-            'ownlStep' : Parameter.ownlStep_forward,
+            'dslStep': Parameter.dslStep_forward,
+            'dslTargetStart': Parameter.dslTargetStart_forward,
+            'dslTargetEnd': Parameter.dslTargetEnd_forward,
+            'ownlStep': Parameter.ownlStep_forward,
             'ownlTargetStart': Parameter.ownlTargetStart_forward,
             'ownltargetEnd': Parameter.ownltargetEnd_forward,
             'dsl_own_set': Parameter.dsl_ownl_set,
             'frslStep': Parameter.frslStep_close,
             'frslTargetStart': Parameter.frslTargetStart_close,
             'frslTargetEnd': Parameter.frslTragetEnd_close,
-            'multiSTL':Parameter.multiSTL_forward#混合止损推进开关
+            'multiSTL': Parameter.multiSTL_forward  # 混合止损推进开关
         }
         strategyParameterSet.append(paradic)
     else:
         # 多品种多周期模式
-        symbolset = pd.read_excel(resultpath + Parameter.forward_set_filename,index_col='No')
+        symbolset = pd.read_excel(resultpath + Parameter.forward_set_filename, index_col='No')
         symbolsetNum = symbolset.shape[0]
         for i in range(symbolsetNum):
             exchangeid = symbolset.ix[i, 'exchange_id']
@@ -182,8 +187,8 @@ if __name__=='__main__':
                 'startdate': symbolset.ix[i, 'startdate'],
                 'enddate': symbolset.ix[i, 'enddate'],
                 'result_para_dic': Parameter.result_para_dic,
-                #'nextmonth':symbolset.ix[i,'nextmonth'],
-                'commonForward':symbolset.ix[i,'commonForward'],
+                # 'nextmonth':symbolset.ix[i,'nextmonth'],
+                'commonForward': symbolset.ix[i, 'commonForward'],
                 'calcDsl': symbolset.ix[i, 'calcDsl'],
                 'calcOwnl': symbolset.ix[i, 'calcOwnl'],
                 'calcFrsl': symbolset.ix[i, 'calcFrsl'],
@@ -195,11 +200,11 @@ if __name__=='__main__':
                 'ownlTargetStart': symbolset.ix[i, 'ownlTargetStart'],
                 'ownltargetEnd': symbolset.ix[i, 'ownltargetEnd'],
                 'dslownl_dsl': symbolset.ix[i, 'dslownl_dsl'],
-                'dslownl_ownl':symbolset.ix[i,'dslownl_ownl'],
+                'dslownl_ownl': symbolset.ix[i, 'dslownl_ownl'],
                 'frslStep': symbolset.ix[i, 'frslStep'],
                 'frslTargetStart': symbolset.ix[i, 'frslTargetStart'],
                 'frslTargetEnd': symbolset.ix[i, 'frslTargetEnd'],
-                'multiSTL':symbolset.ix[i,'multiSTL']#混合止损推进开关
+                'multiSTL': symbolset.ix[i, 'multiSTL']  # 混合止损推进开关
             }
             )
 
@@ -211,7 +216,7 @@ if __name__=='__main__':
         K_MIN = strategyParameter['K_MIN']
         startdate = strategyParameter['startdate']
         enddate = strategyParameter['enddate']
-        #nextmonth = strategyParameter['nextmonth']
+        # nextmonth = strategyParameter['nextmonth']
         nextmonth = enddate[:7]
         symbol = '.'.join([exchange_id, sec_id])
 
@@ -221,23 +226,23 @@ if __name__=='__main__':
         slip = DC.getSlip(symbol)
         pricetick = DC.getPriceTick(symbol)
 
-        #计算控制开关
-        multiSTL=strategyParameter['multiSTL']
+        # 计算控制开关
+        multiSTL = strategyParameter['multiSTL']
         commonForward = strategyParameter['commonForward']
-        dsl=strategyParameter['calcDsl']
-        ownl=strategyParameter['calcOwnl']
-        frsl=strategyParameter['calcFrsl']
-        dslownl=strategyParameter['calcDslOwnl']
+        dsl = strategyParameter['calcDsl']
+        ownl = strategyParameter['calcOwnl']
+        frsl = strategyParameter['calcFrsl']
+        dslownl = strategyParameter['calcDslOwnl']
 
-        #文件路径
-        foldername = ' '.join([strategyName,exchange_id, sec_id, str(K_MIN)])
-        folderpath=resultpath+foldername+'\\'
+        # 文件路径
+        foldername = ' '.join([strategyName, exchange_id, sec_id, str(K_MIN)])
+        folderpath = resultpath + foldername + '\\'
         os.chdir(folderpath)
 
         parasetlist = pd.read_csv(resultpath + Parameter.parasetname)
 
         if multiSTL:
-            #混合止损推进打开的情况下，只做混合止损推进
+            # 混合止损推进打开的情况下，只做混合止损推进
             sltlist = []
             if dsl:
                 dslStep = strategyParameter['dslStep']
@@ -256,26 +261,27 @@ if __name__=='__main__':
                                         frslStep)
                 sltlist.append({'name': 'frsl',
                                 'paralist': fixRateList})
-            getMultiSltForward(strategyName,sltlist,symbolinfo, K_MIN, parasetlist, folderpath, startdate, enddate, nextmonth, windowsSet,result_para_dic)
+            getMultiSltForward(strategyName, sltlist, symbolinfo, K_MIN, parasetlist, folderpath, startdate, enddate, nextmonth, windowsSet, result_para_dic)
             pass
         else:
             if commonForward:
                 colslist = mtf.getColumnsName(False)
                 resultfilesuffix = 'result.csv'
-                indexcolsFlag=False
-                getForward(strategyName,symbolinfo,K_MIN,parasetlist,folderpath,startdate,enddate,nextmonth,windowsSet,colslist, result_para_dic,indexcolsFlag,resultfilesuffix)
+                indexcolsFlag = False
+                getForward(strategyName, symbolinfo, K_MIN, parasetlist, folderpath, startdate, enddate, nextmonth, windowsSet, colslist, result_para_dic, indexcolsFlag,
+                           resultfilesuffix)
             if dsl:
                 dslStep = strategyParameter['dslStep']
                 stoplossList = np.arange(strategyParameter['dslTargetStart'], strategyParameter['dslTargetEnd'], dslStep)
-                getDslForward(strategyName,stoplossList,symbolinfo,K_MIN,parasetlist,folderpath,startdate,enddate,nextmonth,windowsSet,result_para_dic)
+                getDslForward(strategyName, stoplossList, symbolinfo, K_MIN, parasetlist, folderpath, startdate, enddate, nextmonth, windowsSet, result_para_dic)
             if ownl:
                 ownlStep = strategyParameter['ownlStep']
                 winSwitchList = np.arange(strategyParameter['ownlTargetStart'], strategyParameter['ownltargetEnd'],
                                           ownlStep)
-                getownlForward(strategyName,winSwitchList,symbolinfo,K_MIN,parasetlist,folderpath,startdate,enddate,nextmonth,windowsSet,result_para_dic)
+                getownlForward(strategyName, winSwitchList, symbolinfo, K_MIN, parasetlist, folderpath, startdate, enddate, nextmonth, windowsSet, result_para_dic)
             if dslownl:
                 if not Parameter.symbol_KMIN_opt_swtich:
-                    dsl_ownl_List=strategyParameter['dsl_own_set']
+                    dsl_ownl_List = strategyParameter['dsl_own_set']
                 else:
-                    dsl_ownl_List = [[strategyParameter['dslownl_dsl'],strategyParameter['dslownl_ownl']]]
-                getdsl_ownlForward(strategyName,dsl_ownl_List,symbolinfo,K_MIN,parasetlist,folderpath,startdate,enddate,nextmonth,windowsSet,result_para_dic)
+                    dsl_ownl_List = [[strategyParameter['dslownl_dsl'], strategyParameter['dslownl_ownl']]]
+                getdsl_ownlForward(strategyName, dsl_ownl_List, symbolinfo, K_MIN, parasetlist, folderpath, startdate, enddate, nextmonth, windowsSet, result_para_dic)
