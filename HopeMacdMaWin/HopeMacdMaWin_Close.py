@@ -5,6 +5,7 @@ import OnceWinNoLoss as ownl
 import FixRateStopLoss as frsl
 import DslOwnlClose as dslownl
 import MultiStopLoss as msl
+import StopLossLib.AtrStopLoss as atrsl
 import DATA_CONSTANTS as DC
 import pandas as pd
 import os
@@ -210,6 +211,64 @@ def getFRSL(strategyName, symbolInfo, K_MIN, fixRateList, parasetlist, bar1mdic,
     allresultdf.to_csv(strategyName + ' ' + symbol + str(K_MIN) + ' finalresult_frsl.csv', index=False)
 
 
+def get_atr_sl(strategyName, symbolInfo, bar_type, atr_para_list, parasetlist, bar1mdic, barxmdic, result_para_dic, indexcols, progress=False):
+    symbol = symbolInfo.domain_symbol
+    new_indexcols = []
+    for i in indexcols:
+        new_indexcols.append('new_'+i)
+    allresultdf = pd.DataFrame(columns=['setname', 'atr_sl_target', 'worknum']+indexcols+new_indexcols)
+    allnum = 0
+    paranum=parasetlist.shape[0]
+    for atr_para in atr_para_list:
+        timestart = time.time()
+        atr_pendant_n = atr_para['atr_pendant_n']
+        atr_pendant_rate = atr_para['atr_pendant_rate']
+        atr_yoyo_n = atr_para['atr_yoyo_n']
+        atr_yoyo_rate = atr_para['atr_yoyo_rate']
+        folderName = '%d_%.1f_%d_%.1f' % (atr_pendant_n, atr_pendant_rate, atr_yoyo_n, atr_yoyo_rate)
+
+        try:
+            os.mkdir(folderName)  # 创建文件夹
+        except:
+            #print 'folder already exist'
+            pass
+
+        resultdf = pd.DataFrame(columns=['setname', 'atr_sl_target', 'worknum']+indexcols+new_indexcols)
+        setnum = 0
+        numlist = range(0, paranum, 100)
+        numlist.append(paranum)
+        for n in range(1, len(numlist)):
+            pool = multiprocessing.Pool(multiprocessing.cpu_count() - 1)
+            l = []
+            for a in range(numlist[n - 1], numlist[n]):
+                setname = parasetlist.ix[a, 'Setname']
+                if not progress:
+                    l.append(atrsl.atrsl(strategyName,symbolInfo, bar_type, setname, bar1mdic, barxmdic, atr_para, result_para_dic, folderName + '\\',
+                                                             indexcols, timestart))
+                    #l.append(pool.apply_async(atrsl.atrsl, (strategyName,
+                    #                                         symbolInfo, bar_type, setname, bar1mdic, barxmdic, atr_para, result_para_dic, folderName + '\\',
+                    #                                         indexcols)))
+                else:
+                    l.append(pool.apply_async(atrsl.progress_atrsl, (strategyName,
+                                                                     symbolInfo, K_MIN, setname, bar1mdic, barxmdic, atr_para, result_para_dic, folderName + '\\',
+                                                                     indexcols)))
+            pool.close()
+            pool.join()
+
+            for res in l:
+                resultdf.loc[setnum] = res.get()
+                allresultdf.loc[allnum] = resultdf.loc[setnum]
+                setnum += 1
+                allnum += 1
+        # resultdf['cashDelta'] = resultdf['new_endcash'] - resultdf['old_endcash']
+        resultdf.to_csv(folderName + '\\' + strategyName + ' ' + symbol + str(K_MIN) + ' finalresult_atrsl%s.csv' % folderName, index=False)
+        timeend = time.time()
+        timecost = timeend - timestart
+        print (u"atr_%s 计算完毕，共%d组数据，总耗时%.3f秒,平均%.3f秒/组" % (folderName,paranum, timecost, timecost / paranum))
+    # allresultdf['cashDelta'] = allresultdf['new_endcash'] - allresultdf['old_endcash']
+    allresultdf.to_csv(strategyName + ' ' + symbol + str(K_MIN) + ' finalresult_atrsl.csv', index=False)
+
+
 def getDslOwnl(strategyName, symbolInfo, K_MIN, parasetlist, stoplossList, winSwitchList, result_para_dic, indexcols):
     symbol = symbolInfo.domain_symbol
     allresultdf = pd.DataFrame(
@@ -380,7 +439,12 @@ if __name__=='__main__':
             'nolossThreshhold':Parameter.nolossThreshhold_close,
             'frslStep': Parameter.frslStep_close,
             'frslTargetStart':Parameter.frslTargetStart_close,
-            'frslTargetEnd': Parameter.frslTragetEnd_close
+            'frslTargetEnd': Parameter.frslTragetEnd_close,
+            'calcAtrsl': Parameter.calcAtrsl_close,
+            'atr_pendant_n_list': Parameter.atr_pendant_n_list,
+            'atr_pendant_rate_list': Parameter.atr_pendant_rate_list,
+            'atr_yoyo_n_list': Parameter.atr_yoyo_n_list,
+            'atr_yoyo_rate_list': Parameter.atr_yoyo_rate_list
         }
         strategyParameterSet.append(paradic)
     else:
@@ -439,6 +503,7 @@ if __name__=='__main__':
         calcFrsl=strategyParameter['calcFrsl']
         calcMultiSLT=strategyParameter['calcMultiSLT']
         calcDslOwnl=strategyParameter['calcDslOwnl']
+        calcAtrsl = strategyParameter['calcAtrsl']
 
         #优化参数
         dslStep = strategyParameter['dslStep']
@@ -450,6 +515,25 @@ if __name__=='__main__':
         nolossThreshhold = strategyParameter['nolossThreshhold'] * pricetick
         frslStep=strategyParameter['frslStep']
         fixRateList=np.arange(strategyParameter['frslTargetStart'], strategyParameter['frslTargetEnd'], frslStep)
+
+        atrsl_para_dic_list = []
+        if calcAtrsl:
+            atr_pendant_n_list = strategyParameter['atr_pendant_n_list']
+            atr_pendan_rate_list = strategyParameter['atr_pendant_rate_list']
+            atr_yoyo_n_list = strategyParameter['atr_yoyo_n_list']
+            atr_yoyo_rate_list = strategyParameter['atr_yoyo_rate_list']
+            for atr_pendant_n in atr_pendant_n_list:
+                for atr_pendant_rate in atr_pendan_rate_list:
+                    for atr_yoyo_n in atr_yoyo_n_list:
+                        for atr_yoyo_rate in atr_yoyo_rate_list:
+                            atrsl_para_dic_list.append(
+                                {
+                                    'atr_pendant_n':atr_pendant_n,
+                                    'atr_pendant_rate': atr_pendant_rate,
+                                    'atr_yoyo_n': atr_yoyo_n,
+                                    'atr_yoyo_rate': atr_yoyo_rate
+                                }
+                            )
 
         #文件路径
         foldername = ' '.join([strategyName,exchange_id, sec_id, str(K_MIN)])
@@ -464,8 +548,10 @@ if __name__=='__main__':
         # bar1mdic = DC.getBarBySymbolList(domain_symbol, symbolinfo.getSymbolList(), 60, startdate, enddate)
         # barxmdic = DC.getBarBySymbolList(domain_symbol, symbolinfo.getSymbolList(), K_MIN, startdate, enddate)
         cols = ['open', 'high', 'low', 'close', 'strtime', 'utc_time', 'utc_endtime']
-        bar1mdic = DC.getBarDic(symbolinfo, 60, cols)
-        barxmdic = DC.getBarDic(symbolinfo, K_MIN, cols)
+        #bar1mdic = DC.getBarDic(symbolinfo, 60, cols)
+        #barxmdic = DC.getBarDic(symbolinfo, K_MIN, cols)
+        bar1mdic = DC.getBarBySymbolList(domain_symbol, symbolinfo.getSymbolList(), 60, startdate, enddate, cols)
+        barxmdic = DC.getBarBySymbolList(domain_symbol, symbolinfo.getSymbolList(), K_MIN, startdate, enddate, cols)
 
         if calcMultiSLT:
             sltlist=[]
@@ -497,3 +583,6 @@ if __name__=='__main__':
 
             if calcDslOwnl:
                 getDslOwnl(strategyName, symbolinfo, K_MIN, parasetlist, stoplossList, winSwitchList, result_para_dic, indexcols)
+
+            if calcAtrsl:
+                get_atr_sl(strategyName, symbolinfo, K_MIN, atrsl_para_dic_list, parasetlist, bar1mdic, barxmdic, result_para_dic, indexcols, progress=False)
