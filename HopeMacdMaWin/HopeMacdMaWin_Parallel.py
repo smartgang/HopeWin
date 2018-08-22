@@ -122,7 +122,7 @@ def getParallelResult(strategyParameter,resultpath,parasetlist,paranum,indexcols
             'MA_N':ma_n
         }
         l.append(getResult(strategyName, symbolInfo, K_MIN, setname, rawdataDic, paraset, result_para_dic, indexcols,timestart))
-        #l.append(pool.apply_async(getResult, (strategyName, symbolInfo, K_MIN, setname, rawdataDic, paraset, positionRatio, initialCash, indexcols,timestart)))
+        #l.append(pool.apply_async(getResult, (strategyName, symbolInfo, K_MIN, setname, rawdataDic, paraset, result_para_dic, indexcols,timestart)))
     pool.close()
     pool.join()
     timeend = time.time()

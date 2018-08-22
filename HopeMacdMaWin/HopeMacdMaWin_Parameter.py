@@ -18,13 +18,13 @@ result_para_dic = {  # 结果计算相关参数
 }
 
 # =============止损控制开关===================
-progress_close = False
-calcDsl_close = False
-calcOwnl_close = False
-calcFrsl_close = False
-calcAtrsl_close = True
-calcMultiSLT_close = False
-calcDslOwnl_close = False
+progress_close = False      # 增量模式开关
+calcDsl_close = False   # dsl动态止损开关
+calcOwnl_close = False  # ownl有赚不亏开关
+calcGownl_close = True  # gownl递进式有赚不亏开关
+calcFrsl_close = False  # frsl固定比例止损开关
+calcAtrsl_close = False     # atrsl ATR吊灯和yoyo止损开关
+calcMultiSLT_close = False  # 混合止损开关
 # dsl参数
 dslStep_close = -0.002
 dslTargetStart_close = -0.018
@@ -33,7 +33,11 @@ dslTargetEnd_close = -0.020
 ownlStep_close = 0.001
 ownlTargetStart_close = 0.008
 ownltargetEnd_close = 0.010
-nolossThreshhold_close = 3
+nolossThreshhold_close = 4
+# gownl参数
+gownl_protect_list = [0.007, 0.009, 0.011]
+gownl_floor_list = [-4, -1, 2, 5]
+gownl_step_list = [1, 2]
 # frsl参数
 frslStep_close = -0.001
 frslTargetStart_close = -0.010
