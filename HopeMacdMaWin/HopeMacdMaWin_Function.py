@@ -34,6 +34,36 @@ def re_concat_atrsl_result():
     final_result_file.to_csv("%s %s.%s%d finalresult_atrsl_reconcat.csv" % (Parameter.strategyName, Parameter.exchange_id, Parameter.sec_id, Parameter.K_MIN))
 
 
+def re_calc_finalresult():
+    upperpath = DC.getUpperPath(Parameter.folderLevel)
+    resultpath = upperpath + Parameter.resultFolderName
+    symbol_folder = "%s\\%s %s %s %d\\" % (resultpath, Parameter.strategyName, Parameter.exchange_id, Parameter.sec_id, Parameter.K_MIN)
+    os.chdir(symbol_folder)
+    atrsl_folder = '10_4.0_16_2.0\\'    # 止损文件夹名
+    parasetlist = pd.read_csv(resultpath + Parameter.parasetname)['Setname'].tolist()
+    strategyName = Parameter.strategyName
+    symbol ="%s.%s" % (Parameter.exchange_id, Parameter.sec_id)
+    K_MIN = Parameter.K_MIN
+    indexcols = Parameter.ResultIndexDic
+    new_indexcols = []
+    for i in indexcols:
+        new_indexcols.append('new_' + i)
+    resultdf = pd.DataFrame(columns=['setname', 'atr_sl_target', 'worknum'] + indexcols + new_indexcols)
+    resultdf['No'] = range(len(parasetlist))
+    i = 0
+    for setname in parasetlist:
+        print setname
+        worknum = 0
+        olddailydf = pd.read_csv(strategyName + ' ' + symbol + str(K_MIN) + ' ' + setname + ' dailyresult.csv', index_col='date')
+        opr_file_name = "%s %s%d %s resultATR_by_tick.csv" % (strategyName, symbol, K_MIN, setname)
+        oprdf = pd.read_csv(atrsl_folder + opr_file_name)
+        oldr = RS.getStatisticsResult(oprdf, False, indexcols, olddailydf)
+        opr_dialy_k_file_name = "%s %s%d %s dailyresultATR_by_tick.csv" % (strategyName, symbol, K_MIN, setname)
+        dailyClose = pd.read_csv(atrsl_folder + opr_dialy_k_file_name)
+        newr = RS.getStatisticsResult(oprdf, True, indexcols, dailyClose)
+        resultdf.loc[i] = [setname, '10_4.0_16_2.0', worknum] + oldr + newr
+        i += 1
+    resultdf.to_csv("%s%s %s%d finalresult_atrsl10_4.0_16_2.0.csv" % (atrsl_folder, strategyName, symbol, K_MIN))
 
 def calDailyReturn():
     '''基于已有的opr结果，重新补充计算dailyReturn'''
@@ -239,7 +269,8 @@ def multi_slt_remove_polar():
     pass
 
 if __name__=='__main__':
-    re_concat_atrsl_result()  #重新汇总atrsl的结果
+    #re_concat_atrsl_result()  #重新汇总atrsl的结果
+    re_calc_finalresult()
     #calDailyReturn()
     #calResultByPeriod() #按时间分段统计结果
     #remove_polar()
