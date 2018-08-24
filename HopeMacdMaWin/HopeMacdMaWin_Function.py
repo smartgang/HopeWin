@@ -9,6 +9,32 @@ import HopeMacdMaWin_Parameter as Parameter
 from datetime import datetime
 import time
 
+
+def re_concat_atrsl_result():
+    upperpath = DC.getUpperPath(Parameter.folderLevel)
+    resultpath = upperpath + Parameter.resultFolderName
+    symbol_folder = "%s\\%s %s %s %d\\" % (resultpath, Parameter.strategyName, Parameter.exchange_id, Parameter.sec_id, Parameter.K_MIN)
+    os.chdir(symbol_folder)
+    atrsl_para_name_list = []
+    atr_pendant_n_list = Parameter.atr_pendant_n_list_close
+    atr_pendan_rate_list = Parameter.atr_pendant_rate_list_close
+    atr_yoyo_n_list = Parameter.atr_yoyo_n_list_close
+    atr_yoyo_rate_list = Parameter.atr_yoyo_rate_list_close
+    for atr_pendant_n in atr_pendant_n_list:
+        for atr_pendant_rate in atr_pendan_rate_list:
+            for atr_yoyo_n in atr_yoyo_n_list:
+                for atr_yoyo_rate in atr_yoyo_rate_list:
+                    atrsl_para_name_list.append('%d_%.1f_%d_%.1f' % (atr_pendant_n, atr_pendant_rate, atr_yoyo_n, atr_yoyo_rate))
+    final_result_name_0 ="%s %s.%s%d finalresult_atrsl%s.csv" % (Parameter.strategyName, Parameter.exchange_id, Parameter.sec_id, Parameter.K_MIN, atrsl_para_name_list[0])
+    final_result_file = pd.read_csv("%s\\%s" % (atrsl_para_name_list[0], final_result_name_0))
+    for atr_para_name in atrsl_para_name_list[1:]:
+        final_result_name ="%s %s.%s%d finalresult_atrsl%s.csv" % (Parameter.strategyName, Parameter.exchange_id, Parameter.sec_id, Parameter.K_MIN, atr_para_name)
+        final_result_file = pd.concat([final_result_file, pd.read_csv("%s\\%s" % (atr_para_name, final_result_name))])
+
+    final_result_file.to_csv("%s %s.%s%d finalresult_atrsl_reconcat.csv" % (Parameter.strategyName, Parameter.exchange_id, Parameter.sec_id, Parameter.K_MIN))
+
+
+
 def calDailyReturn():
     '''基于已有的opr结果，重新补充计算dailyReturn'''
     startdate='2016-01-01'
@@ -213,6 +239,7 @@ def multi_slt_remove_polar():
     pass
 
 if __name__=='__main__':
+    re_concat_atrsl_result()  #重新汇总atrsl的结果
     #calDailyReturn()
-    calResultByPeriod() #按时间分段统计结果
+    #calResultByPeriod() #按时间分段统计结果
     #remove_polar()

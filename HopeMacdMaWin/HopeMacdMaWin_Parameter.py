@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-'''
+"""
 策略参数设置
-'''
+"""
 # 参数设置
 strategyName = 'HopeMacdMaWin'
 exchange_id = 'SHFE'
@@ -14,39 +14,33 @@ result_para_dic = {  # 结果计算相关参数
     'positionRatio': 1,  # 持仓比例
     'initialCash': 200000,  # 起始资金
     'remove_polar_switch': False,
-    'remove_polaar_rate': 0.01
+    'remove_polar_rate': 0.01
 }
 
-# =============止损控制开关===================
-progress_close = False      # 增量模式开关
-calcDsl_close = False   # dsl动态止损开关
-calcOwnl_close = False  # ownl有赚不亏开关
+# ====================止损控制开关======================
+calcDsl_close = True   # dsl动态止损开关
+dsl_target_list_close = [-0.018, -0.02, -0.022]
+
+calcOwnl_close = True  # ownl有赚不亏开关
+ownl_protect_list_close = [0.008, 0.009, 0.010, 0.011]    # ownl保护触发门限
+ownl_floor_list_close = [3]   # ownl地板价：止损线(PT数量）
+
 calcGownl_close = True  # gownl递进式有赚不亏开关
+gownl_protect_list_close = [0.007, 0.009, 0.011]  # gownl保护触发门限
+gownl_floor_list_close = [-4, -1, 2, 5]   # gownl地板价起始点
+gownl_step_list_close = [1, 2]    # gownl地板价递进步伐
+
 calcFrsl_close = False  # frsl固定比例止损开关
+frsl_target_list_close = [-0.01, -0.011, -0.012]  # 固定止损比例
+
 calcAtrsl_close = False     # atrsl ATR吊灯和yoyo止损开关
-calcMultiSLT_close = False  # 混合止损开关
-# dsl参数
-dslStep_close = -0.002
-dslTargetStart_close = -0.018
-dslTargetEnd_close = -0.020
-# ownl参数
-ownlStep_close = 0.001
-ownlTargetStart_close = 0.008
-ownltargetEnd_close = 0.010
-nolossThreshhold_close = 4
-# gownl参数
-gownl_protect_list = [0.007, 0.009, 0.011]
-gownl_floor_list = [-4, -1, 2, 5]
-gownl_step_list = [1, 2]
-# frsl参数
-frslStep_close = -0.001
-frslTargetStart_close = -0.010
-frslTragetEnd_close = -0.011
-# atr止损参数
-atr_pendant_n_list = [5, 8]
-atr_pendant_rate_list = [1.0, 1.5, 2.0]
-atr_yoyo_n_list = [8, 16, 30]
-atr_yoyo_rate_list = [1, 1.2, 1.5]
+atr_pendant_n_list_close = [5, 8]     # 吊灯atr的n值
+atr_pendant_rate_list_close = [1.0, 1.5, 2.0]     # 吊灯atr的最大回撤止损atr比例
+atr_yoyo_n_list_close = [8, 16, 30]   # yoyo的atr n值
+atr_yoyo_rate_list_close = [1, 1.2, 1.5]      # yoyo的止损atr比例
+
+progress_close = False      # 增量模式开关
+calcMultiSLT_close = True  # 混合止损开关
 
 # =============推进控制开关===================
 # nextMonthName='18-05'
@@ -56,24 +50,29 @@ forwardWinEnd = 12
 # 止损类型开关
 multiSTL_forward = True  # 多止损混合推进开关（忽略common模式）
 common_forward = False  # 普通回测结果推进
-calcDsl_forward = True
-calcOwnl_forward = True
-calsFrsl_forward = False
-calcDslOwnl_forward = False
-# dsl参数
-dslStep_forward = -0.002
-dslTargetStart_forward = -0.018
-dslTargetEnd_forward = -0.020
-# ownl参数
-ownlStep_forward = 0.001
-ownlTargetStart_forward = 0.008
-ownltargetEnd_forward = 0.010
-# frsl参数
-frslStep_forward = -0.001
-frslTargetStart_forward = -0.010
-frslTragetEnd_forward = -0.011
-# dsl_ownl set:dsl在前，ownl在后
-dsl_ownl_set = [[-0.020, 0.009], [-0.018, 0.009]]
+calcDsl_forward = False   # dsl动态止损开关
+dsl_target_list_forward = [-0.018, -0.02, -0.022]
+
+calcOwnl_forward = False  # ownl有赚不亏开关
+ownl_protect_list_forward = [0.008, 0.009, 0.010, 0,011]    # ownl保护触发门限
+ownl_floor_list_forward = [3]   # ownl地板价：止损线(PT数量）
+
+calcGownl_forward = True  # gownl递进式有赚不亏开关
+gownl_protect_list_forward = [0.007, 0.009, 0.011]  # gownl保护触发门限
+gownl_floor_list_forward = [-4, -1, 2, 5]   # gownl地板价起始点
+gownl_step_list_forward = [1, 2]    # gownl地板价递进步伐
+
+calcFrsl_forward = False  # frsl固定比例止损开关
+frsl_target_list_forward = [-0.01, -0.011, -0.012]  # 固定止损比例
+
+calcAtrsl_forward = False     # atrsl ATR吊灯和yoyo止损开关
+atr_pendant_n_list_forward = [5, 8]     # 吊灯atr的n值
+atr_pendant_rate_list_forward = [1.0, 1.5, 2.0]     # 吊灯atr的最大回撤止损atr比例
+atr_yoyo_n_list_forward = [8, 16, 30]   # yoyo的atr n值
+atr_yoyo_rate_list_forward = [1, 1.2, 1.5]      # yoyo的止损atr比例
+
+progress_forward = False      # 增量模式开关
+calcMultiSLT_forward = False  # 混合止损开关
 
 # ==================每月参数计算=====================
 # newmonth='2018-05'#要生成参数的新月份
@@ -143,3 +142,15 @@ forward_set_filename = strategyName + '_forward_set.xlsx'
 # ====================系统参数==================================
 folderLevel = 2
 resultFolderName = '\\Results\\'
+
+
+# ===================== 通用功能函数 =========================================
+def para_str_to_float(para_str):
+    # 功能函数：用于将从多品种多周期文件读取进来的字符串格式的参数列表转换为符点型列表
+    para_float_list = []
+    if type(para_str) != 'str':
+        para_float_list.append(float(para_str))
+    else:
+        for x in para_str.split(','):
+            para_float_list.append(float(x))
+    return para_float_list
