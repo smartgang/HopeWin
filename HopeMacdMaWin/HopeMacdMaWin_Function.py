@@ -316,7 +316,7 @@ def plot_parameter_result_pic(multi_sybmol_file_name = "multi_symbol_1st_xu.xlsx
         folder_name = "%s %s %s %d\\" % (Parameter.strategyName, exchange, sec, bar_type)
         final_result_file = pd.read_csv(folder_name + "%s %s.%s %d finalresults.csv" % (Parameter.strategyName, exchange, sec, bar_type))
         para_file = pd.read_csv(folder_name + "%s %s %d %s.csv" % (exchange, sec, bar_type, Parameter.parasetname))
-        para_name_list = ['N', 'N1', 'M1', 'M2', 'MaN']
+        para_name_list = ['MACD_Short', 'MACD_Long', 'MACD_M', 'MA_N']
         for i in range(len(para_name_list)):
             para_name = para_name_list[i]
             final_result_file[para_name_list] = para_file[para_name_list]
