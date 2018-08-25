@@ -166,7 +166,7 @@ def para_str_to_float(para_str):
 def para_str_to_int(para_str):
     # 功能函数：用于将从多品种多周期文件读取进来的字符串格式的参数列表转换为符点型列表
     para_float_list = []
-    if type(para_str) != 'str':
+    if type(para_str) == 'int':
         para_float_list.append(int(para_str))
     else:
         for x in para_str.split(','):
