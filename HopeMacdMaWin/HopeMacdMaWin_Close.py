@@ -212,11 +212,11 @@ def get_atr_sl(strategyName, symbolInfo, bar_type, atr_para_list, parasetlist, b
             for a in range(numlist[n - 1], numlist[n]):
                 setname = parasetlist.ix[a, 'Setname']
                 if not progress:
-                    l.append(atrsl.atrsl(strategyName, symbolInfo, bar_type, setname, bar1mdic, barxmdic, atr_para, result_para_dic, folderName + '\\',
-                                         indexcols, timestart))
-                    # l.append(pool.apply_async(atrsl.atrsl, (strategyName,
-                    #                                         symbolInfo, bar_type, setname, bar1mdic, barxmdic, atr_para, result_para_dic, folderName + '\\',
-                    #                                         indexcols, timestart)))
+                    #l.append(atrsl.atrsl(strategyName, symbolInfo, bar_type, setname, bar1mdic, barxmdic, atr_para, result_para_dic, folderName + '\\',
+                    #                     indexcols, timestart))
+                    l.append(pool.apply_async(atrsl.atrsl, (strategyName,
+                                                             symbolInfo, bar_type, setname, bar1mdic, barxmdic, atr_para, result_para_dic, folderName + '\\',
+                                                             indexcols, timestart)))
                 else:
                     l.append(pool.apply_async(atrsl.progress_atrsl, (strategyName,
                                                                      symbolInfo, K_MIN, setname, bar1mdic, barxmdic, atr_para, result_para_dic, folderName + '\\',
@@ -266,11 +266,11 @@ def get_gownl(strategyName, symbolInfo, bar_type, gownl_para_list, parasetlist, 
             for a in range(numlist[n - 1], numlist[n]):
                 setname = parasetlist.ix[a, 'Setname']
                 if not progress:
-                    l.append(gownl.gownl(strategyName, symbolInfo, bar_type, setname, bar1mdic, barxmdic, gownl_para, result_para_dic, folderName + '\\',
-                                         indexcols, timestart))
-                    # l.append(pool.apply_async(atrsl.atrsl, (strategyName,
-                    #                                         symbolInfo, bar_type, setname, bar1mdic, barxmdic, atr_para, result_para_dic, folderName + '\\',
-                    #                                         indexcols, timestart)))
+                    #l.append(gownl.gownl(strategyName, symbolInfo, bar_type, setname, bar1mdic, barxmdic, gownl_para, result_para_dic, folderName + '\\',
+                    #                     indexcols, timestart))
+                    l.append(pool.apply_async(gownl.gownl, (strategyName,
+                                                             symbolInfo, bar_type, setname, bar1mdic, barxmdic, gownl_para, result_para_dic, folderName + '\\',
+                                                             indexcols, timestart)))
                 else:
                     l.append(pool.apply_async(gownl.progress_gownl, (strategyName,
                                                                      symbolInfo, bar_type, setname, bar1mdic, barxmdic, gownl_para, result_para_dic, folderName + '\\',

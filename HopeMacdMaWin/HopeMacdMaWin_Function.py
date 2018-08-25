@@ -10,6 +10,36 @@ from datetime import datetime
 import time
 
 
+def stat_multi_symbol_result():
+    upperpath = DC.getUpperPath(Parameter.folderLevel)
+    resultpath = upperpath + Parameter.resultFolderName
+    os.chdir(resultpath)
+    multi_symbol_df = pd.read_excel('HopeMacdMaWin_symbol_KMIN_set.xlsx')
+    for n, row in multi_symbol_df.iterrows():
+        strategy_name = row['strategyName']
+        exchange_id = row['exchange_id']
+        sec_id = row['sec_id']
+        bar_type = row['K_MIN']
+        folder_name = "%s %s %s %d\\" % (strategy_name, exchange_id, sec_id, bar_type)
+        result_file_name = "%s %s.%s %d finalresults.csv" % (strategy_name, exchange_id, sec_id, bar_type)
+        print result_file_name
+        result_df = pd.read_csv(folder_name + result_file_name)
+        multi_symbol_df.ix[n, 'OprTimes'] = result_df['OprTimes'].mean()
+        multi_symbol_df.ix[n, 'Annual_max'] = result_df['Annual'].max()
+        multi_symbol_df.ix[n, 'Annual_avg'] = result_df['Annual'].mean()
+        multi_symbol_df.ix[n, 'EndCash_avg'] = result_df['EndCash'].mean()
+        multi_symbol_df.ix[n, 'EndCash_max'] = result_df['EndCash'].max()
+        multi_symbol_df.ix[n, 'own_cash_max_max'] = result_df['max_own_cash'].max()
+        multi_symbol_df.ix[n, 'own_cash_max_avg'] = result_df['max_own_cash'].mean()
+        multi_symbol_df.ix[n, 'Sharpe_max'] = result_df['Sharpe'].max()
+        multi_symbol_df.ix[n, 'SR_avg'] = result_df['SR'].mean()
+        multi_symbol_df.ix[n, 'DR_avg'] = result_df['DrawBack'].mean()
+        multi_symbol_df.ix[n, 'SingleEarn_avg'] = result_df['MaxSingleEarnRate'].mean()
+        multi_symbol_df.ix[n, 'SingleLoss_avg'] = result_df['MaxSingleLossRate'].mean()
+        multi_symbol_df.ix[n, 'ProfitLossRate_avg'] = result_df['ProfitLossRate'].mean()
+    multi_symbol_df.to_csv('HopeMacdMaWin_symbol_KMIN_set2_result.csv')
+
+
 def re_concat_atrsl_result():
     upperpath = DC.getUpperPath(Parameter.folderLevel)
     resultpath = upperpath + Parameter.resultFolderName
@@ -268,9 +298,41 @@ def multi_slt_remove_polar():
     allresultdf.to_csv("%s %s%d finalresult_multiSLT_%s.csv" % (strategyName, symbol, K_MIN, allresultname), index=False)
     pass
 
+
+
+def plot_parameter_result_pic(multi_sybmol_file_name = "multi_symbol_1st_xu.xlsx"):
+    """绘制finalresult结果中参数对应的end cash和max own cash的分布柱状图"""
+    import matplotlib.pyplot as plt
+
+    upperpath = DC.getUpperPath(Parameter.folderLevel)
+    resultpath = upperpath + Parameter.resultFolderName
+    os.chdir(resultpath)
+    symbol_sellected = pd.read_excel(multi_sybmol_file_name)
+    for n , rows in symbol_sellected.iterrows():
+        fig = plt.figure(figsize=(6, 12))
+        exchange = rows['exchange']
+        sec = rows['sec']
+        bar_type = rows['bar_type']
+        folder_name = "%s %s %s %d\\" % (Parameter.strategyName, exchange, sec, bar_type)
+        final_result_file = pd.read_csv(folder_name + "%s %s.%s %d finalresults.csv" % (Parameter.strategyName, exchange, sec, bar_type))
+        para_file = pd.read_csv(folder_name + "%s %s %d %s.csv" % (exchange, sec, bar_type, Parameter.parasetname))
+        para_name_list = ['N', 'N1', 'M1', 'M2', 'MaN']
+        for i in range(len(para_name_list)):
+            para_name = para_name_list[i]
+            final_result_file[para_name_list] = para_file[para_name_list]
+            grouped = final_result_file.groupby(para_name)
+            end_cash_grouped = grouped['EndCash'].mean()
+            p = plt.subplot(len(para_name_list), 1, i+1)
+            p.set_title(para_name)
+            p.bar(end_cash_grouped.index.tolist(), end_cash_grouped.values)
+            print end_cash_grouped
+        fig.savefig('%s %s %s %d_para_distribute.png' % (Parameter.strategyName, exchange, sec, bar_type), dip=500)
+
+
 if __name__=='__main__':
     #re_concat_atrsl_result()  #重新汇总atrsl的结果
-    re_calc_finalresult()
+    #re_calc_finalresult()
     #calDailyReturn()
     #calResultByPeriod() #按时间分段统计结果
     #remove_polar()
+    plot_parameter_result_pic("multi_symbol_1st_xu.xlsx")     # 绘制参数的结果分布图，用于参数优化分析，使用时要设置好文件名

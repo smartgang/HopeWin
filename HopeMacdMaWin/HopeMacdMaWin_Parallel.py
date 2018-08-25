@@ -18,7 +18,7 @@ def getResult(strategyName, symbolinfo, K_MIN, setname, rawdataDic, para, result
     initialCash = result_para_dic['initialCash']
     positionRatio = result_para_dic['positionRatio']
     remove_polar_switch = result_para_dic['remove_polar_switch']
-    remove_polaar_rate = result_para_dic['remove_polaar_rate']
+    remove_polar_rate = result_para_dic['remove_polaar_rate']
 
     symbollist = symbolinfo.getSymbolList()
     symbolDomainDic = symbolinfo.getSymbolDomainDic()
@@ -49,7 +49,7 @@ def getResult(strategyName, symbolinfo, K_MIN, setname, rawdataDic, para, result
 
     # 去极值操作
     if remove_polar_switch:
-        result = RS.opr_result_remove_polar(result, remove_polaar_rate)
+        result = RS.opr_result_remove_polar(result, remove_polar_rate)
 
     # 全部操作结束后，要根据修改完的主力时间重新接出一份主连来计算dailyK
     domain_bar = pd.DataFrame()
@@ -65,10 +65,12 @@ def getResult(strategyName, symbolinfo, K_MIN, setname, rawdataDic, para, result
                                                                                                       symbolinfo,
                                                                                                       initialCash,
                                                                                                       positionRatio)
-    result.to_csv(strategyName + ' ' + symbolinfo.domain_symbol + str(K_MIN) + ' ' + setname + ' result.csv', index=False)
+    bt_folder = "%s %d backtesting\\" % (symbolinfo.domain_symbol, K_MIN)
+
+    result.to_csv(bt_folder + strategyName + ' ' + symbolinfo.domain_symbol + str(K_MIN) + ' ' + setname + ' result.csv', index=False)
     dR = RS.dailyReturn(symbolinfo, result, dailyK, initialCash)  # 计算生成每日结果
     dR.calDailyResult()
-    dR.dailyClose.to_csv((strategyName + ' ' + symbolinfo.domain_symbol + str(K_MIN) + ' ' + setname + ' dailyresult.csv'))
+    dR.dailyClose.to_csv((bt_folder + strategyName + ' ' + symbolinfo.domain_symbol + str(K_MIN) + ' ' + setname + ' dailyresult.csv'))
     results = RS.getStatisticsResult(result, False, indexcols, dR.dailyClose)
     del result
     print results
@@ -121,8 +123,8 @@ def getParallelResult(strategyParameter,resultpath,parasetlist,paranum,indexcols
             'MACD_M': macd_m,
             'MA_N':ma_n
         }
-        l.append(getResult(strategyName, symbolInfo, K_MIN, setname, rawdataDic, paraset, result_para_dic, indexcols,timestart))
-        #l.append(pool.apply_async(getResult, (strategyName, symbolInfo, K_MIN, setname, rawdataDic, paraset, result_para_dic, indexcols,timestart)))
+        #l.append(getResult(strategyName, symbolInfo, K_MIN, setname, rawdataDic, paraset, result_para_dic, indexcols,timestart))
+        l.append(pool.apply_async(getResult, (strategyName, symbolInfo, K_MIN, setname, rawdataDic, paraset, result_para_dic, indexcols,timestart)))
     pool.close()
     pool.join()
     timeend = time.time()
@@ -143,27 +145,21 @@ if __name__=='__main__':
     upperpath=DC.getUpperPath(Parameter.folderLevel)
     resultpath = upperpath + Parameter.resultFolderName
 
-    # 取参数集
-    parasetlist = pd.read_csv(resultpath + Parameter.parasetname)
-    paranum = parasetlist.shape[0]
-
-    #indexcols
-    indexcols=Parameter.ResultIndexDic
-    #for d, f in Parameter.ResultIndexDic.items():
-    #    if f:indexcols.append(d)
+    # indexcols
+    indexcols = Parameter.ResultIndexDic
 
     #参数设置
     strategyParameterSet=[]
     if not Parameter.symbol_KMIN_opt_swtich:
-        #单品种单周期模式
-        paradic={
-        'strategyName':Parameter.strategyName,
-        'exchange_id': Parameter.exchange_id,
-        'sec_id': Parameter.sec_id,
-        'K_MIN': Parameter.K_MIN,
-        'startdate': Parameter.startdate,
-        'enddate' : Parameter.enddate,
-        'result_para_dic': Parameter.result_para_dic
+        # 单品种单周期模式
+        paradic = {
+            'strategyName': Parameter.strategyName,
+            'exchange_id': Parameter.exchange_id,
+            'sec_id': Parameter.sec_id,
+            'K_MIN': Parameter.K_MIN,
+            'startdate': Parameter.startdate,
+            'enddate': Parameter.enddate,
+            'result_para_dic': Parameter.result_para_dic
         }
         strategyParameterSet.append(paradic)
     else:
@@ -177,18 +173,57 @@ if __name__=='__main__':
                 'strategyName': symbolset.ix[i, 'strategyName'],
                 'exchange_id': exchangeid,
                 'sec_id': secid,
-                'K_MIN': symbolset.ix[i,'K_MIN'],
-                'startdate': symbolset.ix[i,'startdate'],
-                'enddate': symbolset.ix[i,'enddate'],
-                'result_para_dic': Parameter.result_para_dic
+                'K_MIN': int(symbolset.ix[i, 'K_MIN']),
+                'startdate': symbolset.ix[i, 'startdate'],
+                'enddate': symbolset.ix[i, 'enddate'],
+                'result_para_dic': Parameter.result_para_dic,
+                'para_Macd_S': symbolset.ix[i, 'MACD_Short'],
+                'para_Macd_L': symbolset.ix[i, 'MACD_Long'],
+                'para_Macd_M': symbolset.ix[i, 'MACD_M'],
+                'para_MA_N': symbolset.ix[i, 'MA_N']
             }
             )
     allsymbolresult_cols=['Setname']+indexcols+[ 'strategyName','exchange_id','sec_id','K_MIN']
     allsymbolresult = pd.DataFrame(columns=allsymbolresult_cols)
     for strategyParameter in strategyParameterSet:
-        r=getParallelResult(strategyParameter,resultpath,parasetlist,paranum,indexcols)
-        r['strategyName']=strategyParameter['strategyName']
-        r['exchange_id']=strategyParameter['exchange_id']
+        strategy_name = strategyParameter['strategyName']
+        exchange_id = strategyParameter['exchange_id']
+        sec_id = strategyParameter['sec_id']
+        bar_type = strategyParameter['K_MIN']
+        foldername = ' '.join([strategy_name, exchange_id, sec_id, str(bar_type)])
+        try:
+            os.chdir(resultpath)
+            os.mkdir(foldername)
+        except:
+            print ("%s folder already exsist!" % foldername)
+        finally:
+            os.chdir(foldername)
+        try:
+            os.mkdir("%s.%s %d backtesting" % (exchange_id, sec_id, bar_type))
+        except:
+            pass
+
+        try:
+            # 取参数集
+            parasetlist = pd.read_csv("%s %s %d %s" % (exchange_id, sec_id, bar_type, Parameter.parasetname))
+        except:
+            if not Parameter.symbol_KMIN_opt_swtich:
+                para_list_dic = None    # 单品种模式使用默认参数
+            else:
+                # 如果没有，则直接生成
+                para_list_dic = {
+                    'MACD_S':strategyParameter['para_Macd_S'],
+                    'MACD_L':strategyParameter['para_Macd_L'],
+                    'MACD_M':strategyParameter['para_Macd_M'],
+                    'MA_N': strategyParameter['para_MA_N']
+                }
+            parasetlist = Parameter.generat_para_file(para_list_dic)
+            parasetlist.to_csv("%s %s %d %s" % (exchange_id, sec_id, bar_type, Parameter.parasetname))
+        paranum = parasetlist.shape[0]
+
+        r = getParallelResult(strategyParameter, resultpath, parasetlist, paranum, indexcols)
+        r['strategyName'] = strategyParameter['strategyName']
+        r['exchange_id'] = strategyParameter['exchange_id']
         r['sec_id'] = strategyParameter['sec_id']
         r['K_MIN'] = strategyParameter['K_MIN']
         allsymbolresult = pd.concat([allsymbolresult, r])

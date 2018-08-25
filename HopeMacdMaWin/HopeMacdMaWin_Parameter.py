@@ -17,6 +17,12 @@ result_para_dic = {  # 结果计算相关参数
     'remove_polar_rate': 0.01
 }
 
+strategy_para_dic = {
+    "MACD_S": [15, 20, 25, 30, 35],
+    "MACD_L": [6, 10, 14],
+    "MACD_M": [3, 6, 9],
+    "MA_N": [6, 10, 14, 18]
+}
 # ====================止损控制开关======================
 calcDsl_close = True   # dsl动态止损开关
 dsl_target_list_close = [-0.018, -0.02, -0.022]
@@ -84,6 +90,7 @@ ResultIndexDic = [
     "LongOprTimes",  # 多操作次数
     "ShortOprTimes",  # 空操作次数
     "EndCash",  # 最终资金
+    "MaxOwnCash",  # 最大期间资金
     "LongOprRate",  # 多操作占比
     "ShortOprRate",  # 空操作占比
     "Annual",  # 年化收益
@@ -154,3 +161,40 @@ def para_str_to_float(para_str):
         for x in para_str.split(','):
             para_float_list.append(float(x))
     return para_float_list
+
+
+def para_str_to_int(para_str):
+    # 功能函数：用于将从多品种多周期文件读取进来的字符串格式的参数列表转换为符点型列表
+    para_float_list = []
+    if type(para_str) != 'str':
+        para_float_list.append(int(para_str))
+    else:
+        for x in para_str.split(','):
+            para_float_list.append(int(x))
+    return para_float_list
+
+def generat_para_file(para_list_dic = None):
+    import pandas as pd
+    if para_list_dic:
+        macd_s_list = para_str_to_int(para_list_dic['MACD_S'])
+        macd_l_list = para_str_to_int(para_list_dic['MACD_L'])
+        macd_m_list = para_str_to_int(para_list_dic['MACD_M'])
+        ma_n_list= para_str_to_int(para_list_dic['MA_N'])
+    else:
+        macd_s_list = strategy_para_dic['MACD_S']
+        macd_l_list = strategy_para_dic['MACD_L']
+        macd_m_list = strategy_para_dic['MACD_M']
+        ma_n_list = strategy_para_dic['MA_N']
+    setlist = []
+    i = 0
+    for s1 in macd_s_list:
+        for m1 in macd_m_list:
+            for l1 in macd_l_list:
+                for ma_n in ma_n_list:
+                    setname = "Set%d MS%d ML%d MM%d MA%d" % (i, s1, m1, l1, ma_n)
+                    l = [setname, s1, m1, l1, ma_n]
+                    setlist.append(l)
+                    i += 1
+
+    setpd = pd.DataFrame(setlist, columns=['Setname','MACD_Short','MACD_Long','MACD_M','MA_N'])
+    return setpd
