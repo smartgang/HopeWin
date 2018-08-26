@@ -8,11 +8,11 @@ exchange_id = 'SHFE'
 sec_id = 'RB'
 K_MIN = 3600
 startdate = '2010-01-01'
-enddate = '2018-07-01'
+enddate = '2018-07-31'
 parasetname = 'ParameterSet_MACD_MA.csv'
 result_para_dic = {  # 结果计算相关参数
-    'positionRatio': 1,  # 持仓比例
-    'initialCash': 200000,  # 起始资金
+    'positionRatio': 0.2,  # 持仓比例
+    'initialCash': 1000000,  # 起始资金
     'remove_polar_switch': False,
     'remove_polar_rate': 0.01
 }
@@ -137,7 +137,7 @@ ResultIndexDic=[
 '''
 # ===============多品种多周期优化参数=============================
 # 多品种多周期优化开关，打开后代码会从下面标识的文件中导入参数
-symbol_KMIN_opt_swtich = False
+symbol_KMIN_opt_swtich =True
 
 # 1.品种和周期组合文件
 symbol_KMIN_set_filename = strategyName + '_symbol_KMIN_set.xlsx'
@@ -191,8 +191,8 @@ def generat_para_file(para_list_dic = None):
         for m1 in macd_m_list:
             for l1 in macd_l_list:
                 for ma_n in ma_n_list:
-                    setname = "Set%d MS%d ML%d MM%d MA%d" % (i, s1, m1, l1, ma_n)
-                    l = [setname, s1, m1, l1, ma_n]
+                    setname = "Set%d MS%d ML%d MM%d MA%d" % (i, s1, l1, m1, ma_n)
+                    l = [setname, s1, l1, m1, ma_n]
                     setlist.append(l)
                     i += 1
 
