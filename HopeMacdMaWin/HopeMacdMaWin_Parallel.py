@@ -18,7 +18,7 @@ def getResult(strategyName, symbolinfo, K_MIN, setname, rawdataDic, para, result
     initialCash = result_para_dic['initialCash']
     positionRatio = result_para_dic['positionRatio']
     remove_polar_switch = result_para_dic['remove_polar_switch']
-    remove_polar_rate = result_para_dic['remove_polaar_rate']
+    remove_polar_rate = result_para_dic['remove_polar_rate']
 
     symbollist = symbolinfo.getSymbolList()
     symbolDomainDic = symbolinfo.getSymbolDomainDic()
