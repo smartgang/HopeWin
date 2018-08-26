@@ -432,8 +432,8 @@ if __name__ == '__main__':
     resultpath = upperpath + Parameter.resultFolderName
 
     # 取参数集
-    parasetlist = pd.read_csv(resultpath + Parameter.parasetname)
-    paranum = parasetlist.shape[0]
+    #parasetlist = pd.read_csv(resultpath + Parameter.parasetname)
+    #paranum = parasetlist.shape[0]
 
     # indexcols
     indexcols = Parameter.ResultIndexDic
@@ -485,6 +485,10 @@ if __name__ == '__main__':
                 'startdate': symbolset.ix[i, 'startdate'],
                 'enddate': symbolset.ix[i, 'enddate'],
                 'result_para_dic': Parameter.result_para_dic,
+                'para_Macd_S': symbolset.ix[i, 'MACD_Short'],
+                'para_Macd_L': symbolset.ix[i, 'MACD_Long'],
+                'para_Macd_M': symbolset.ix[i, 'MACD_M'],
+                'para_MA_N': symbolset.ix[i, 'MA_N'],
                 'progress': symbolset.ix[i, 'progress'],
                 'calcDsl': symbolset.ix[i, 'calcDsl'],
                 'calcOwnl': symbolset.ix[i, 'calcOwnl'],
@@ -619,6 +623,24 @@ if __name__ == '__main__':
         # barxmdic = DC.getBarDic(symbolinfo, K_MIN, cols)
         bar1mdic = DC.getBarBySymbolList(domain_symbol, symbolinfo.getSymbolList(), 60, startdate, enddate, cols)
         barxmdic = DC.getBarBySymbolList(domain_symbol, symbolinfo.getSymbolList(), K_MIN, startdate, enddate, cols)
+
+        try:
+            # 取参数集
+            parasetlist = pd.read_csv("%s %s %d %s" % (exchange_id, sec_id, K_MIN, Parameter.parasetname))
+        except:
+            if not Parameter.symbol_KMIN_opt_swtich:
+                para_list_dic = None    # 单品种模式使用默认参数
+            else:
+                # 如果没有，则直接生成
+                para_list_dic = {
+                    'MACD_S':strategyParameter['para_Macd_S'],
+                    'MACD_L':strategyParameter['para_Macd_L'],
+                    'MACD_M':strategyParameter['para_Macd_M'],
+                    'MA_N': strategyParameter['para_MA_N']
+                }
+            parasetlist = Parameter.generat_para_file(para_list_dic)
+            parasetlist.to_csv("%s %s %d %s" % (exchange_id, sec_id, K_MIN, Parameter.parasetname))
+        paranum = parasetlist.shape[0]
 
         if calcMultiSLT:
             sltlist = []
