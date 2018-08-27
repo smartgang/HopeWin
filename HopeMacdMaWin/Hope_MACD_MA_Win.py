@@ -48,8 +48,8 @@ def HopeWin_MACD_MA(symbolinfo,rawdata_macd,macdParaSet):
     macd = MA.hull_macd(rawdata_macd['close'], MACD_S, MACD_L, MACD_M)  # hull_macd
     rawdata_macd['DIF'] = macd[0]
     rawdata_macd['DEA'] = macd[1]
-    #rawdata_macd['MA'] = MA.calEMA(rawdata_macd['close'],MA_N)
-    rawdata_macd['MA'] = MA.hull_ma(rawdata_macd['close'], MA_N)
+    rawdata_macd['MA'] = MA.calEMA(rawdata_macd['close'],MA_N)
+    #rawdata_macd['MA'] = MA.hull_ma(rawdata_macd['close'], MA_N)
 
     # 计算MACD的金叉和死叉
     rawdata_macd['MACD_True'], rawdata_macd['MACD_Cross'] = MA.dfCross(rawdata_macd, 'DIF', 'DEA')
