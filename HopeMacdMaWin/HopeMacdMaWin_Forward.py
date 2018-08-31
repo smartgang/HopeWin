@@ -397,7 +397,8 @@ if __name__ == '__main__':
                 colslist = mtf.getColumnsName(False)
                 resultfilesuffix = 'result.csv'
                 indexcolsFlag = False
-                getForward(strategyName, symbolinfo, K_MIN, parasetlist, folderpath, startdate, enddate, nextmonth, windowsSet, colslist, result_para_dic, indexcolsFlag,
+                bt_folder = "%s %d backtesting\\" % (symbol, K_MIN)
+                getForward(strategyName, symbolinfo, K_MIN, parasetlist, folderpath + bt_folder, startdate, enddate, nextmonth, windowsSet, colslist, result_para_dic, indexcolsFlag,
                            resultfilesuffix)
             if calcDsl:
                 getDslForward(strategyName, dsl_para_dic_list, symbolinfo, K_MIN, parasetlist, folderpath, startdate, enddate, nextmonth, windowsSet, result_para_dic)
