@@ -178,8 +178,8 @@ if __name__ == '__main__':
     resultpath = upperpath + Parameter.resultFolderName
 
     # 取参数集
-    parasetlist = pd.read_csv(resultpath + Parameter.parasetname)
-    paranum = parasetlist.shape[0]
+    #parasetlist = pd.read_csv(resultpath + Parameter.parasetname)
+    #paranum = parasetlist.shape[0]
     windowsSet = range(Parameter.forwardWinStart, Parameter.forwardWinEnd + 1)  # 白区窗口值
     # ======================================参数配置===================================================
     strategyParameterSet = []
@@ -211,7 +211,7 @@ if __name__ == '__main__':
             'gownl_protect_list': Parameter.gownl_protect_list_forward,
             'gownl_floor_list': Parameter.gownl_floor_list_forward,
             'gownl_step_list': Parameter.gownl_step_list_forward,
-            'multiSTL': Parameter.multiSTL_forward  # 混合止损推进开关
+            'multiSLT': Parameter.multiSTL_forward  # 混合止损推进开关
         }
         strategyParameterSet.append(paradic)
     else:
@@ -235,7 +235,7 @@ if __name__ == '__main__':
                 'calcOwnl': symbolset.ix[i, 'calcOwnl'],
                 'calcFrsl': symbolset.ix[i, 'calcFrsl'],
                 'calcDslOwnl': symbolset.ix[i, 'calcDslOwnl'],
-                'multiSTL': symbolset.ix[i, 'multiSTL'],  # 混合止损推进开关
+                'multiSLT': symbolset.ix[i, 'multiSTL'],  # 混合止损推进开关
                 'dsl_target_list': Parameter.para_str_to_float(symbolset.ix[i, 'dsl_target']),
                 'ownl_protect_list': Parameter.para_str_to_float(symbolset.ix[i, 'ownl_protect']),
                 'ownl_floor_list': Parameter.para_str_to_float(symbolset.ix[i, 'ownl_floor']),
@@ -271,12 +271,11 @@ if __name__ == '__main__':
         pricetick = DC.getPriceTick(symbol)
 
         # 计算控制开关
-        progress = strategyParameter['progress']
         calcCommon = strategyParameter['commonForward']
         calcDsl = strategyParameter['calcDsl']
         calcOwnl = strategyParameter['calcOwnl']
         calcFrsl = strategyParameter['calcFrsl']
-        calcMultiSLT = strategyParameter['calcMultiSLT']
+        calcMultiSLT = strategyParameter['multiSLT']
         calcAtrsl = strategyParameter['calcAtrsl']
         calcGownl = strategyParameter['calcGownl']
         # 优化参数
@@ -357,11 +356,13 @@ if __name__ == '__main__':
         folderpath = resultpath + foldername + '\\'
         os.chdir(folderpath)
 
-        parasetlist = pd.read_csv(resultpath + Parameter.parasetname)
+
+        parasetlist = pd.read_csv("%s %s %d %s" % (exchange_id, sec_id, K_MIN, Parameter.parasetname))
+        #paranum = parasetlist.shape[0]
+        #parasetlist = pd.read_csv(resultpath + Parameter.parasetname)
 
         if calcMultiSLT:
             # 混合止损推进打开的情况下，只做混合止损推进
-            sltlist = []
             sltlist = []
             if calcDsl:
                 sltlist.append({'name': 'dsl',

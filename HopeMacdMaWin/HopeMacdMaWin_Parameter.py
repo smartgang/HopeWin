@@ -77,9 +77,6 @@ atr_pendant_rate_list_forward = [1.0, 1.5, 2.0]     # 吊灯atr的最大回撤�
 atr_yoyo_n_list_forward = [8, 16, 30]   # yoyo的atr n值
 atr_yoyo_rate_list_forward = [1, 1.2, 1.5]      # yoyo的止损atr比例
 
-progress_forward = False      # 增量模式开关
-calcMultiSLT_forward = False  # 混合止损开关
-
 # ==================每月参数计算=====================
 # newmonth='2018-05'#要生成参数的新月份
 month_n = 7  # n+x的n值，即往前推多少个月
