@@ -391,7 +391,7 @@ def getMultiSLT(strategyName, symbolInfo, K_MIN, parasetlist, barxmdic, sltlist,
         for sltp in sltset:
             #newfolder += (sltp['name'] + '_%.3f' % (sltp['sltValue']))
             v = sltp['sltValue']
-            newfolder += "{}_{} ".format(sltp['name'], v["para_name"])
+            newfolder += "{}_{}".format(sltp['name'], v["para_name"])
         try:
             os.mkdir(newfolder)  # 创建文件夹
         except:
