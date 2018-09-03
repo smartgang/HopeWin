@@ -53,12 +53,18 @@ def getResult(strategyName, symbolinfo, K_MIN, setname, rawdataDic, para, result
 
     # 全部操作结束后，要根据修改完的主力时间重新接出一份主连来计算dailyK
     domain_bar = pd.DataFrame()
-    for symbol in symbollist:
+    for symbol in symbollist[:-1]:
         symbol_domain_start = symbolDomainDic[symbol][0]
         symbol_domain_end = symbolDomainDic[symbol][1]
         rbar = rawdataDic[symbol]
         bars = rbar.loc[(rbar['utc_time'] >= symbol_domain_start) & (rbar['utc_endtime'] < symbol_domain_end)]
         domain_bar = pd.concat([domain_bar, bars])
+    # 最后一个合约只截前不截后
+    symbol = symbollist[-1]
+    symbol_domain_start = symbolDomainDic[symbol][0]
+    rbar = rawdataDic[symbol]
+    bars = rbar.loc[rbar['utc_time'] >= symbol_domain_start]
+    domain_bar = pd.concat([domain_bar, bars])
 
     dailyK = DC.generatDailyClose(domain_bar)
     result['commission_fee'], result['per earn'], result['own cash'], result['hands'] = RS.calcResult(result,
