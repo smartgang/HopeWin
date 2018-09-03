@@ -73,7 +73,7 @@ def getmultiStlMonthParameter(strategyName,sltlist,symbolinfo, K_MIN, parasetlis
     for sltset in finalSltSetList:
         newfolder = ''
         for sltp in sltset:
-            newfolder += (sltp['name'] + '_%.3f' % (sltp['sltValue']))
+            newfolder += (sltp['name'] + '_%s' % (sltp['sltValue']['para_name']))
         rawdatapath = folderpath + newfolder + '\\'
         df = mtf.getMonthParameter(strategyName, startmonth, endmonth, symbolinfo, K_MIN, parasetlist, rawdatapath,colslist, resultfilesuffix)
         filenamehead = ("%s%s_%s_%d_%s_parameter_%s" % (rawdatapath,strategyName,symbolinfo.domain_symbol, K_MIN, endmonth,newfolder))
@@ -84,9 +84,6 @@ if __name__=='__main__':
     upperpath = DC.getUpperPath(Parameter.folderLevel)
     resultpath = upperpath + Parameter.resultFolderName
 
-    # 取参数集
-    parasetlist = pd.read_csv(resultpath + Parameter.parasetname)
-    paranum = parasetlist.shape[0]
     #生成月份列表，取开始月
     newmonth=Parameter.enddate[:7]
     month_n=Parameter.month_n
@@ -166,7 +163,11 @@ if __name__=='__main__':
                                 'atr_yoyo_rate': atr_yoyo_rate
                             }
                         )
-
+    # 取参数集
+    #parasetlist = pd.read_csv(resultpath + Parameter.parasetname)
+    foldername = ' '.join([strategyName, exchange_id, sec_id, str(K_MIN)])
+    parasetlist = pd.read_csv(resultpath + foldername + "\\%s %s %d %s" % (exchange_id, sec_id, K_MIN, Parameter.parasetname))
+    paranum = parasetlist.shape[0]
     gownl_para_dic_list = []
     if calcGownl:
         gownl_protect_list = Parameter.gownl_protect_list_forward
