@@ -88,9 +88,9 @@ def HopeWin_MACD_MA(symbolinfo,rawdata_macd,macdParaSet):
 
     # 取出开多序号和开空序号
     openlongindex = rawdata_macd.loc[
-            (rawdata_macd['MACD_Cross'] == 1)  & (rawdata_macd['close'] > rawdata_macd['MA']) ].index
+            (rawdata_macd['MACD_Cross'] == 1) & (rawdata_macd['close'] > rawdata_macd['MA'])].index
     openshortindex = rawdata_macd.loc[
-            (rawdata_macd['MACD_Cross'] == -1)  & (rawdata_macd['close'] < rawdata_macd['MA'])].index
+            (rawdata_macd['MACD_Cross'] == -1) & (rawdata_macd['close'] < rawdata_macd['MA'])].index
     # 从多仓序列中取出开多序号的内容，即为开多操作
     longopr = longcrosslist.loc[openlongindex]
     longopr['tradetype'] = 1
